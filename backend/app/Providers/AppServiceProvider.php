@@ -6,17 +6,14 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        // On force Laravel à utiliser /tmp pour le cache et les vues sur Vercel
+        if (config('app.env') === 'production') {
+            $this->app->useStoragePath('/tmp');
+        }
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         //
