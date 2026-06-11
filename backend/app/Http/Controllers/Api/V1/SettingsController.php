@@ -24,6 +24,8 @@ class SettingsController extends Controller
             'name' => 'required|string|max:255',
             'settings' => 'required|array',
             'settings.logo_url' => 'nullable|string',
+            'settings.favicon_url' => 'nullable|string',
+            'settings.browser_title' => 'nullable|string',
             'settings.primary_color' => ['nullable', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'], // Correction ici
             'settings.socials' => 'nullable|array',
             'settings.contact' => 'nullable|array',
