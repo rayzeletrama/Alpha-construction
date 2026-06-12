@@ -8,6 +8,7 @@ $paths = [
     '/tmp/framework/views',
     '/tmp/framework/cache',
     '/tmp/framework/sessions',
+    '/tmp/app/public'
 ];
 foreach ($paths as $path) {
     if (!is_dir($path)) {
