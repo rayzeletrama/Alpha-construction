@@ -7,6 +7,10 @@
     },
     "routes": [
         {
+            "src": "/check.php",
+            "dest": "/public/check.php"
+        },
+        {
             "src": "/storage/(.*)",
             "dest": "/public/storage/$1"
         },
