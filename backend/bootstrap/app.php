@@ -26,5 +26,17 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+         // FORCER LES ERREURS EN JSON (Pour éviter l'erreur "view not found")
+        $exceptions->shouldRenderGroupAsJson('api');
+
+        $exceptions->render(function (Throwable $e, Request $request) {
+            if ($request->is('api/*') || $request->is('v1/*')) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'exception' => get_class($e),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ], 500);
+            }
+        });       //
     })->create();
