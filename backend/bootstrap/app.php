@@ -26,9 +26,12 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (Throwable $e, Request $request) {
             return response()->json([
-                'error' => 'Laravel 13 Production Error',
+                'status' => 'error',
                 'message' => $e->getMessage(),
-                'exception' => get_class($e),
+                'debug' => [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => env('APP_DEBUG') ? $e->getTrace()[0] : 'hidden'
             ], 500);
         });
     })
