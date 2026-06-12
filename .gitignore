@@ -18,7 +18,7 @@
 # --- Frontend (React) ---
 /frontend/node_modules/
 /frontend/dist/
-/frontend/.env
+/frontend/.env*
 
 # --- Docker & System ---
 .DS_Store
