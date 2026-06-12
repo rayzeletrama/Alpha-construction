@@ -32,6 +32,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                     'file' => $e->getFile(),
                     'line' => $e->getLine(),
                     'trace' => env('APP_DEBUG') ? $e->getTrace()[0] : 'hidden'
+                ]
             ], 500);
         });
     })
