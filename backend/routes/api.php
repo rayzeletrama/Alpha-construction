@@ -10,6 +10,10 @@ use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\LeadController;
 
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok', 'laravel_version' => app()->version()]);
+});
+
 Route::middleware(['tenant'])->group(function () {
 
     // --- ROUTES PUBLIQUES (V1) ---
