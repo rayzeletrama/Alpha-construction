@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -23,11 +24,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Désactiver CSRF pour l'API (Sanctum utilise des tokens)
         $middleware->validateCsrfTokens(except: [
             'api/*',
+            'v1/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
          // FORCER LES ERREURS EN JSON (Pour éviter l'erreur "view not found")
-        $exceptions->shouldRenderGroupAsJson('api');
 
         $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->is('api/*') || $request->is('v1/*')) {
