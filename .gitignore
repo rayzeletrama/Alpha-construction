@@ -11,7 +11,10 @@
 /backend/storage/app/public/tenants/
 /backend/public/storage
 /backend/composer.phar
-
+/backend/bootstrap/cache/*.php
+/backend/storage/framework/cache/*
+/backend/storage/framework/views/*
+/backend/storage/framework/sessions/*
 # --- Frontend (React) ---
 /frontend/node_modules/
 /frontend/dist/
