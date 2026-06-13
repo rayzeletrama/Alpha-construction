@@ -4,7 +4,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Throwable;
 
 $app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,7 +21,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Laravel 13 : Forcer le JSON pour éviter l'erreur de "View"
-        $exceptions->shouldRenderGroupAsJson('api');
 
         $exceptions->render(function (Throwable $e, Request $request) {
             return response()->json([
