@@ -28,6 +28,13 @@ RUN composer install --no-dev --no-scripts --no-interaction --optimize-autoloade
 # 6. Copier le reste du code
 COPY . .
 
+RUN php artisan config:clear
+RUN php artisan route:clear
+RUN php artisan view:clear
+
+# Assure-toi que le dossier bootstrap/cache est vide de tout fichier .php
+RUN rm -f bootstrap/cache/*.php
+
 # 7. Ajuster les permissions (Crucial)
 RUN chown -R $user:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
