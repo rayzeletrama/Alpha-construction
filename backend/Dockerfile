@@ -38,7 +38,12 @@ COPY . .
 
 # 8. Maintenant que le code ET les dépendances sont là, on peut nettoyer
 RUN php artisan config:clear
+RUN php artisan cache:clear
 RUN php artisan route:clear
+RUN php artisan view:clear
+
+# Optionnel : pré-générer les fichiers de découverte (mais ne pas mettre en cache la config ici)
+RUN php artisan package:discover --ansi
 
 # 9. Ajuster les permissions
 RUN chown -R $user:www-data /var/www/html/storage /var/www/html/bootstrap/cache
