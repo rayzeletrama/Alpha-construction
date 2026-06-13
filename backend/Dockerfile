@@ -31,6 +31,9 @@ WORKDIR /var/www/html
 # 6. Copier le code source (sans le dossier vendor qui est ignoré)
 COPY . .
 
+RUN php artisan config:clear
+RUN php artisan route:clear
+
 # 7. INSTALLER LES DÉPENDANCES PHP (C'est l'étape qui manquait !)
 # On lance composer en mode production
 RUN composer install --no-dev --optimize-autoloader --no-interaction

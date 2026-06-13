@@ -18,21 +18,26 @@ class TenancyServiceProvider extends ServiceProvider
 
     public function boot(Request $request): void
     {
-        // On ne cherche le tenant que si on est sur une route API ou Web (pas en console)
         if (!app()->runningInConsole()) {
-            $host = $request->getHost();
+            try {
+                $host = $request->getHost();
 
-            // Identification par domaine (ex: boutique1.com)
-            // ou par header (ex: X-Tenant-Id pour le dev)
-            $tenant = Tenant::where('domain', $host)
-                            ->orWhere('slug', explode('.', $host)[0])
-                            ->first();
+            // On vérifie si la table existe avant de requêter (évite le crash si migration pas faite)
+                if (!\Schema::hasTable('tenants')) {
+                    return;
+                }
 
-            if ($tenant) {
-                $this->app->instance('currentTenant', $tenant);
+                $tenant = \App\Models\Tenant::where('domain', $host)
+                                ->orWhere('slug', explode('.', $host)[0])
+                                ->first();
 
-                // Configurer dynamiquement les variables système si besoin
-                config(['app.name' => $tenant->name]);
+                if ($tenant) {
+                    $this->app->instance('currentTenant', $tenant);
+                    config(['app.name' => $tenant->name]);
+                }
+            } catch (\Exception $e) {
+            // On log l'erreur mais on ne crash pas l'app
+                \Log::error("Tenancy Error: " . $e->getMessage());
             }
         }
     }
