@@ -5,9 +5,6 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 
-// On définit le dossier temporaire pour Vercel
-$storagePath = '/tmp/storage';
-
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -16,25 +13,39 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Enregistrement des alias de middleware
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'tenant' => \App\Http\Middleware\IdentifyTenant::class,
         ]);
-        $middleware->validateCsrfTokens(except: ['api/*', 'v1/*']);
+
+        // Désactiver CSRF pour l'API
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+            'v1/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        // Force le format JSON pour toutes les erreurs API
         $exceptions->shouldRenderGroupAsJson('api');
 
+        // Gestionnaire d'erreurs global pour éviter les pages HTML en production
         $exceptions->render(function (\Throwable $e, Request $request) {
-            return response()->json([
-                'error' => 'Production Error',
-                'message' => $e->getMessage(),
-                'exception' => get_class($e),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ], 500);
+            if ($request->is('api/*') || $request->is('v1/*')) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => $e->getMessage(),
+                    'debug'   => [
+                        'exception' => get_class($e),
+                        'file'      => str_replace(base_path(), '', $e->getFile()),
+                        'line'      => $e->getLine(),
+                    ]
+                ], 500);
+            }
         });
     })
     ->create()
-    // On force le storage path APRES le create mais Laravel 11/13 le gère mieux ici
+    // Utilise /tmp seulement si on est sur Vercel, sinon utilise le storage normal
     ->useStoragePath(isset($_SERVER['VERCEL']) ? '/tmp' : storage_path());
