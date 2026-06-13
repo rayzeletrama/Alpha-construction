@@ -1,20 +1,17 @@
 <?php
 
-// 1. Forcer le dossier de stockage en /tmp (Seul endroit inscriptible sur Vercel)
-putenv('APP_STORAGE=/tmp');
+// 1. Forcer Laravel à utiliser /tmp (le seul dossier accessible en écriture sur Vercel)
+$storagePath = '/tmp/storage';
+putenv("APP_STORAGE={$storagePath}");
 
-// 2. Créer les dossiers nécessaires au démarrage
-$paths = [
-    '/tmp/framework/views',
-    '/tmp/framework/cache',
-    '/tmp/framework/sessions',
-    '/tmp/app/public'
-];
-foreach ($paths as $path) {
-    if (!is_dir($path)) {
-        mkdir($path, 0777, true);
-    }
+// 2. Créer l'arborescence complète pour éviter que Laravel ne cherche à écrire ailleurs
+if (!is_dir($storagePath)) {
+    mkdir($storagePath, 0777, true);
+    mkdir($storagePath . '/framework/views', 0777, true);
+    mkdir($storagePath . '/framework/cache', 0777, true);
+    mkdir($storagePath . '/framework/sessions', 0777, true);
+    mkdir($storagePath . '/app/public', 0777, true);
 }
 
-// 3. Charger Laravel
+// 3. Charger le point d'entrée réel
 require __DIR__ . '/../public/index.php';
