@@ -21,28 +21,29 @@ RUN docker-php-ext-install pdo_pgsql gd zip
 # 3. Récupérer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 4. Créer l'utilisateur système pour Render
+# 4. Créer l'utilisateur système
 RUN useradd -G www-data,root -u $uid -d /home/$user $user
 RUN mkdir -p /home/$user/.composer && chown -R $user:$user /home/$user
 
-# 5. Définir le dossier de travail
 WORKDIR /var/www/html
 
-# 6. Copier le code source (sans le dossier vendor qui est ignoré)
+# 5. Copier les fichiers de dépendances en premier (optimisation du cache Docker)
+COPY composer.json composer.lock ./
+
+# 6. Installer les dépendances sans lancer les scripts Laravel (car le code n'est pas encore là)
+RUN composer install --no-dev --no-scripts --no-interaction --optimize-autoloader
+
+# 7. Copier le reste du code
 COPY . .
 
+# 8. Maintenant que le code ET les dépendances sont là, on peut nettoyer
 RUN php artisan config:clear
 RUN php artisan route:clear
 
-# 7. INSTALLER LES DÉPENDANCES PHP (C'est l'étape qui manquait !)
-# On lance composer en mode production
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# 8. Ajuster les permissions pour Laravel
+# 9. Ajuster les permissions
 RUN chown -R $user:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 9. Passer sur l'utilisateur non-root
 USER $user
 
 # 10. Commande de démarrage
