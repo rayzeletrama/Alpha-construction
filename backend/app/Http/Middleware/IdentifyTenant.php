@@ -11,41 +11,48 @@ class IdentifyTenant
 {
     public function handle(Request $request, Closure $next)
     {
-        // 1. Laisser passer le CORS
+        // 1. FORCER LES HEADERS CORS MANUELLEMENT (Secours si cors.php échoue)
+        // On récupère l'origine de la requête (ex: ton site vercel)
+        $origin = $request->header('Origin');
+
+        // 2. Gérer les requêtes OPTIONS (Preflight)
         if ($request->isMethod('OPTIONS')) {
-            return $next($request);
+            return response('', 200)
+                ->header('Access-Control-Allow-Origin', $origin)
+                ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                ->header('Access-Control-Allow-Credentials', 'true')
+                ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
         }
 
-
+        // 3. Logique d'identification du Tenant
         try {
-
             $host = $request->getHost();
-            // 2. Tenter de trouver la boutique (sans cache pour le moment pour débugger)
+
+            // On cherche par domaine ou slug
             $tenant = Tenant::where('domain', $host)
                 ->orWhere('slug', 'alpha')
                 ->first();
 
-            // 3. Fallback : si on ne trouve rien, on prend la première
             if (!$tenant) {
-                $tenant = DB::table('tenants')->first();
+                $tenant = Tenant::first();
             }
 
-            if (!$tenant) {
-                return response()->json(['error' => 'Base de données vide'], 404);
+            if ($tenant) {
+                app()->instance('currentTenant', $tenant);
             }
-
-            // Important : convertir en modèle si c'est un objet de table brute
-            if (!($tenant instanceof Tenant)) {
-                $tenant = Tenant::find($tenant->id);
-            }
-
-            app()->instance('currentTenant', $tenant);
-
         } catch (\Exception $e) {
-            // Si la DB est trop lente, on log et on essaie de continuer
-            \Log::error("Erreur identification : " . $e->getMessage());
+            \Log::error("Connexion DB échouée: " . $e->getMessage());
         }
 
-        return $next($request);
+        // 4. Exécuter la requête suivante
+        $response = $next($request);
+
+        // 5. Injecter les headers CORS dans la réponse finale (même si c'est une erreur)
+        if (method_exists($response, 'header')) {
+            $response->header('Access-Control-Allow-Origin', $origin)
+                     ->header('Access-Control-Allow-Credentials', 'true');
+        }
+
+        return $response;
     }
 }
