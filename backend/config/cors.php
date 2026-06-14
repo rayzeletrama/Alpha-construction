@@ -15,12 +15,15 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'v1/*', 'v1/settings', 'v1/pages/*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'v1/*'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
-
+    'allowed_origins' => [
+        'https://alpha-construction-front.vercel.app',
+        'http://localhost:5173',
+        'http://localhost:3000'
+    ],
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],

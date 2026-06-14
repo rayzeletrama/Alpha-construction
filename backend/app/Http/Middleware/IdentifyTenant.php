@@ -16,9 +16,10 @@ class IdentifyTenant
             return $next($request);
         }
 
-        $host = $request->getHost();
 
         try {
+
+            $host = $request->getHost();
             // 2. Tenter de trouver la boutique (sans cache pour le moment pour débugger)
             $tenant = Tenant::where('domain', $host)
                 ->orWhere('slug', 'alpha')
