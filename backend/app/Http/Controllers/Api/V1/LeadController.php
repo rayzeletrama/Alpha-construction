@@ -26,16 +26,15 @@ class LeadController extends Controller
         // 2. Récupérer le destinataire configuré dans la page contact
         $page = Page::where('slug', 'contact')->first();
 
-        // On récupère l'email dans le JSON 'content'
-        $recipient = $page->content['form_recipient'] ?? null;
+        if ($page && isset($page->content['form_recipient'])) {
+            $recipient = $page->content['form_recipient'];
 
-        // 3. Envoi de l'email si un destinataire est configuré
-        if ($recipient && filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
             try {
+            // On envoie au destinataire choisi dans l'admin
+            // On ajoute un replyTo pour que l'artisan puisse répondre directement au prospect
                 Mail::to($recipient)->send(new NewLeadReceived($lead));
             } catch (\Exception $e) {
-                // On log l'erreur mais on ne bloque pas la réponse pour l'utilisateur
-                \Log::error("Erreur envoi mail : " . $e->getMessage());
+                \Log::error("Erreur envoi mail Brevo : " . $e->getMessage());
             }
         }
 

@@ -18,7 +18,11 @@ class NewLeadReceived extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Nouveau message de contact : ' . $this->lead->subject,
+            subject: 'Nouveau message de contact : ' . $this->lead->name,
+
+            replyTo: [
+                new \Illuminate\Mail\Mailables\Address($this->lead->email, $this->lead->name),
+            ],
         );
     }
 

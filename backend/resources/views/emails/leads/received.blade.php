@@ -1,7 +1,7 @@
 @component('mail::message')
 # Nouvelle demande de contact
 
-Vous avez reçu un nouveau message depuis votre site **{{ config('app.name') }}**.
+Vous avez reçu un nouveau message depuis votre site **{{ app('currentTenant')->name }}**.
 
 **Détails du prospect :**
 - **Nom :** {{ $lead->name }}
@@ -11,10 +11,15 @@ Vous avez reçu un nouveau message depuis votre site **{{ config('app.name') }}*
 **Message :**
 {{ $lead->message }}
 
-@component('mail::button', ['url' => config('app.url') . '/admin'])
+@php
+    // On génère l'URL vers ton admin Render
+    $adminUrl = config('app.url') . '/admin';
+@endphp
+
+@component('mail::button', ['url' => $adminUrl])
 Accéder au Dashboard
 @endcomponent
 
 Merci,<br>
-L'équipe {{ config('app.name') }}
+L'équipe {{ app('currentTenant')->name }}
 @endcomponent
