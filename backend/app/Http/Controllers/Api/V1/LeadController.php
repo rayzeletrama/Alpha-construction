@@ -27,17 +27,18 @@ class LeadController extends Controller
         $page = Page::where('slug', 'contact')->first();
 
         if ($page && isset($page->content['form_recipient'])) {
-            $recipient = $page->content['form_recipient'];
+            $recipient = $page->content['form_recipient'] ?? env('MAIL_USERNAME');
 
             try {
             // On envoie au destinataire choisi dans l'admin
             // On ajoute un replyTo pour que l'artisan puisse répondre directement au prospect
                 Mail::to($recipient)->send(new NewLeadReceived($lead));
+                \Log::info("Email envoyé à : " . $recipient);
             } catch (\Exception $e) {
-                \Log::error("Erreur envoi mail Brevo : " . $e->getMessage());
+                \Log::error("Erreur envoi mail smtp : " . $e->getMessage());
             }
         }
 
-        return response()->json(['message' => 'Message envoyé avec succès !'], 201);
+        return response()->json(['message' => 'Message envoyé avec succès !'], 200);
     }
 }
