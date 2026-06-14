@@ -14,8 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'tenant' => \App\Http\Middleware\IdentifyTenant::class,
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         ]);
 
         $middleware->validateCsrfTokens(except: ['api/*', 'v1/*']);
