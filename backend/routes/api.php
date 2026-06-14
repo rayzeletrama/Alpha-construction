@@ -14,6 +14,11 @@ Route::get('/health', function () {
     return response()->json(['status' => 'ok', 'laravel_version' => app()->version()]);
 });
 
+// Route ultra-légère pour garder le serveur éveillé
+Route::get('/pulse', function () {
+    return response()->json(['status' => 'alive', 'time' => now()]);
+});
+
 Route::middleware(['tenant'])->group(function () {
 
     // --- ROUTES PUBLIQUES (V1) ---
