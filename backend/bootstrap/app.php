@@ -20,15 +20,20 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: ['api/*', 'v1/*']);
     })
-    ->withExceptions(function (Exceptions $exceptions) {
-        // Gestion des erreurs API en JSON
+->withExceptions(function (Exceptions $exceptions) {
+        // Force le JSON pour toutes les erreurs
+        $exceptions->shouldRenderGroupAsJson('api');
+
+        // On empêche Laravel de chercher le moteur "view"
         $exceptions->render(function (\Throwable $e, Request $request) {
-            if ($request->is('api/*') || $request->is('v1/*')) {
-                return response()->json([
-                    'error' => 'Server Error',
-                    'message' => $e->getMessage(),
-                ], 500);
-            }
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'debug' => [
+                    'file' => str_replace(base_path(), '', $e->getFile()),
+                    'line' => $e->getLine()
+                ]
+            ], 500);
         });
     })
     ->create();
