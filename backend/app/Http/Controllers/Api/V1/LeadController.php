@@ -33,14 +33,10 @@ class LeadController extends Controller
         \Log::info("Destinataire identifié : " . $recipient);
         \Log::info("Mailer utilisé : " . config('mail.default'));
 
-            try {
             // On envoie au destinataire choisi dans l'admin
             // On ajoute un replyTo pour que l'artisan puisse répondre directement au prospect
                 Mail::to($recipient)->send(new NewLeadReceived($lead));
                 \Log::info("Email envoyé à : " . $recipient);
-            } catch (\Exception $e) {
-                \Log::error("Erreur envoi mail smtp : " . $e->getMessage());
-            }
         }
 
         return response()->json(['message' => 'Message envoyé avec succès !'], 200);
