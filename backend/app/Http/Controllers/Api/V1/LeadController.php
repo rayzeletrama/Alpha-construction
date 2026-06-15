@@ -29,6 +29,10 @@ class LeadController extends Controller
         if ($page && isset($page->content['form_recipient'])) {
             $recipient = $page->content['form_recipient'] ?? env('MAIL_USERNAME');
 
+        \Log::info("Tentative d'envoi d'email...");
+        \Log::info("Destinataire identifié : " . $recipient);
+        \Log::info("Mailer utilisé : " . config('mail.default'));
+
             try {
             // On envoie au destinataire choisi dans l'admin
             // On ajoute un replyTo pour que l'artisan puisse répondre directement au prospect
