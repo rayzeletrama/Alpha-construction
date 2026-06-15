@@ -35,7 +35,12 @@ class LeadController extends Controller
 
             // On envoie au destinataire choisi dans l'admin
             // On ajoute un replyTo pour que l'artisan puisse répondre directement au prospect
-                Mail::to($recipient)->send(new NewLeadReceived($lead));
+        try {
+            Mail::to($recipient)->send(new NewLeadReceived($lead));
+        } catch (\Exception $e) {
+    // Si ça échoue encore, on veut savoir pourquoi dans les logs de Render
+            \Log::error("Erreur Resend : " . $e->getMessage());
+        }
                 \Log::info("Email envoyé à : " . $recipient);
         }
 
