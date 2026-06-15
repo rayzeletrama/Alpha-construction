@@ -173,7 +173,7 @@ export const Dashboard = () => {
                 domaine spécifique ?
               </p>
               <a
-                href="mailto:beru@votre-saas.com"
+                href="mailto:rivonirina.ra@gmail.com"
                 className="flex items-center justify-between group p-3 border border-gray-100 rounded-sm hover:border-primary transition-colors"
               >
                 <span className="text-xs font-black uppercase tracking-widest">
