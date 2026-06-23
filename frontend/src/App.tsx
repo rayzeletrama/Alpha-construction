@@ -60,6 +60,7 @@ function App() {
               <Route path="terrassement" element={<EditEarthwork />} />
               <Route path="realisations" element={<EditProjects />} />
               <Route path="articles" element={<ArticleList />} />
+              <Route path="articles/new" element={<EditArticle />} />
               <Route path="articles/edit/:slug" element={<EditArticle />} />
               {/* Ajout des routes manquantes qui causaient l'erreur console */}
               <Route
