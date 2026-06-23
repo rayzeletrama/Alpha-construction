@@ -88,7 +88,10 @@ class ArticleSeeder extends Seeder
         ];
 
         foreach ($articles as $art) {
-            Article::updateOrCreate(['slug' => $art['slug']], $art);
+    Article::updateOrCreate(
+        ['slug' => $art['slug'], 'tenant_id' => $tenant->id], // On cherche par slug ET tenant
+        $art
+    );
         }
     }
 }
