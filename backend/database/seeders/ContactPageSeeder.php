@@ -39,6 +39,7 @@ class ContactPageSeeder extends Seeder
                             [
                                 'badge' => 'Valeurs 01',
                                 'title' => 'Notre Engagement Qualité',
+                                'slug' => 'contact-engagement-qualite',
                                 'text' => "La satisfaction de nos clients est le moteur de notre entreprise...",
                                 'image' => 'https://images.unsplash.com/photo-1497366216548-37526070297c'
                             ],

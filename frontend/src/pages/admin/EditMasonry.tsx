@@ -277,7 +277,7 @@ export const EditMasonry = () => {
         </div>
       </div>
 
-      {/* ARTICLES TECHNIQUES (Articles) */}
+      {/* SECTION ARTICLES TECHNIQUES */}
       <section className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-black tracking-tighter uppercase">
@@ -292,75 +292,95 @@ export const EditMasonry = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {formData.articles.map((art: any, i: number) => (
-            <div
-              key={i}
-              className="bg-white p-6 md:p-8 rounded-sm shadow-sm border border-gray-100 relative group"
-            >
-              <button
-                onClick={() => {
-                  if (confirm("Supprimer cet article technique ?")) {
-                    const newArt = formData.articles.filter(
+          {formData.articles.map(
+            (
+              art: any,
+              i: number, // art et i sont définis ICI
+            ) => (
+              <div
+                key={i}
+                className="bg-white p-6 md:p-8 rounded-sm shadow-sm border border-gray-100 relative group"
+              >
+                <button
+                  onClick={() => {
+                    const newArtList = formData.articles.filter(
                       (_: any, idx: number) => idx !== i,
                     );
-                    setFormData({ ...formData, articles: newArt });
-                  }
-                }}
-                className="absolute top-4 right-4 p-2 text-gray-300 hover:text-red-500 transition-colors"
-              >
-                <Trash2 size={18} />
-              </button>
+                    setFormData({ ...formData, articles: newArtList });
+                  }}
+                  className="absolute top-4 right-4 p-2 text-gray-300 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 size={18} />
+                </button>
 
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="w-full md:w-32">
-                  <div className="relative group aspect-square bg-gray-100 rounded-sm overflow-hidden">
-                    <img
-                      src={art.image}
-                      className="w-full h-full object-cover"
-                    />
-                    <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                      <Upload size={14} className="text-white" />
-                      <input
-                        type="file"
-                        className="hidden"
-                        onChange={(e) => handleImageUpload(e, "article", i)}
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="w-full md:w-32">
+                    <div className="relative group aspect-square bg-gray-100 rounded-sm overflow-hidden">
+                      <img
+                        src={art.image}
+                        className="w-full h-full object-cover"
                       />
-                    </label>
+                      <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                        <Upload size={14} className="text-white" />
+                        <input
+                          type="file"
+                          className="hidden"
+                          onChange={(e) => handleImageUpload(e, "article", i)}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-4">
+                    {/* --- NOUVEAU CHAMP : SLUG DE LIAISON --- */}
+                    <div className="bg-blue-50/50 p-2 rounded-sm border border-blue-100">
+                      <label className="text-[9px] font-black text-blue-500 uppercase tracking-widest block mb-1">
+                        Slug de l'article détaillé
+                      </label>
+                      <input
+                        className="w-full text-xs font-mono bg-transparent outline-none focus:text-blue-700"
+                        placeholder="ex: maconnerie-pierre"
+                        value={art.slug || ""}
+                        onChange={(e) => {
+                          const newArtList = [...formData.articles];
+                          newArtList[i].slug = e.target.value; // Mise à jour de la propriété slug
+                          setFormData({ ...formData, articles: newArtList });
+                        }}
+                      />
+                    </div>
+
+                    <input
+                      className="w-full text-xs font-black text-primary uppercase bg-transparent border-b border-gray-50 outline-none"
+                      value={art.badge || ""}
+                      onChange={(e) => {
+                        const newArtList = [...formData.articles];
+                        newArtList[i].badge = e.target.value;
+                        setFormData({ ...formData, articles: newArtList });
+                      }}
+                    />
+                    <input
+                      className="w-full font-bold text-lg outline-none"
+                      value={art.title || ""}
+                      onChange={(e) => {
+                        const newArtList = [...formData.articles];
+                        newArtList[i].title = e.target.value;
+                        setFormData({ ...formData, articles: newArtList });
+                      }}
+                    />
+                    <textarea
+                      className="w-full text-sm text-gray-500 bg-gray-50 p-3 rounded-sm outline-none"
+                      rows={3}
+                      value={art.text || ""}
+                      onChange={(e) => {
+                        const newArtList = [...formData.articles];
+                        newArtList[i].text = e.target.value;
+                        setFormData({ ...formData, articles: newArtList });
+                      }}
+                    />
                   </div>
                 </div>
-                <div className="flex-1 space-y-4">
-                  <input
-                    className="w-full text-xs font-black text-primary uppercase bg-transparent border-b border-gray-50 outline-none"
-                    value={art.badge || ""}
-                    onChange={(e) => {
-                      const newArt = [...formData.articles];
-                      newArt[i].badge = e.target.value;
-                      setFormData({ ...formData, articles: newArt });
-                    }}
-                  />
-                  <input
-                    className="w-full font-bold text-lg outline-none"
-                    value={art.title || ""}
-                    onChange={(e) => {
-                      const newArt = [...formData.articles];
-                      newArt[i].title = e.target.value;
-                      setFormData({ ...formData, articles: newArt });
-                    }}
-                  />
-                  <textarea
-                    className="w-full text-sm text-gray-500 bg-gray-50 p-3 rounded-sm outline-none"
-                    rows={3}
-                    value={art.text || ""}
-                    onChange={(e) => {
-                      const newArt = [...formData.articles];
-                      newArt[i].text = e.target.value;
-                      setFormData({ ...formData, articles: newArt });
-                    }}
-                  />
-                </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       </section>
 
