@@ -1,7 +1,8 @@
 import { motion } from "motion/react";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { ChevronRight, CheckCircle2, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../lib/axios";
+import { Link } from "react-router-dom";
 
 export const Earthwork = () => {
   const { data: page, isLoading } = useQuery({
@@ -112,6 +113,16 @@ export const Earthwork = () => {
                 <p className="text-gray-600 leading-relaxed text-lg">
                   {article.text}
                 </p>
+                {/* --- LE BOUTON VOIR PLUS --- */}
+                {article.slug && (
+                  <Link
+                    to={`/article/${article.slug}`}
+                    className="inline-flex items-center text-primary font-bold text-sm tracking-widest uppercase group"
+                  >
+                    En savoir plus
+                    <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                )}
               </motion.div>
               <div
                 className={`relative aspect-video md:aspect-square overflow-hidden rounded-sm shadow-2xl ${index % 2 !== 0 ? "md:order-1" : ""}`}

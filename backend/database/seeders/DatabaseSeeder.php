@@ -77,6 +77,7 @@ class DatabaseSeeder extends Seeder
             RenovationPageSeeder::class,
             EarthworkPageSeeder::class,
             ProjectsPageSeeder::class,
+            ArticleSeeder::class,
         ]);
 
         $this->command->info('-----------------------------------------------');

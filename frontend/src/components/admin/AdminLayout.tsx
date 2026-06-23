@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Home,
+  BookOpen,
   Mail,
   Package,
   Settings,
@@ -25,6 +26,11 @@ export const AdminLayout = () => {
   const menuItems = [
     { name: "Dashboard", path: "/admin", icon: <LayoutDashboard size={20} /> },
     { name: "Page Accueil", path: "/admin/home", icon: <Home size={20} /> },
+    {
+      name: "Articles Détails",
+      path: "/admin/articles",
+      icon: <BookOpen size={20} />,
+    },
     {
       name: "Maçonnerie",
       path: "/admin/maconnerie",

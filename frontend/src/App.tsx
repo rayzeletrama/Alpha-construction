@@ -11,6 +11,7 @@ import { Renovation } from "./pages/Renovation";
 import { Earthwork } from "./pages/Earthwork";
 import { Projects } from "./pages/Projects";
 import { Contact } from "./pages/Contact";
+import { ArticleDetail } from "./pages/ArticleDetail.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { EditContact } from "./pages/admin/EditContact";
@@ -23,6 +24,8 @@ import { EditRenovation } from "./pages/admin/EditRenovation";
 import { EditEarthwork } from "./pages/admin/EditEarthwork";
 import { EditProjects } from "./pages/admin/EditProjects.tsx";
 import { Settings } from "./pages/admin/Settings.tsx";
+import { EditArticle } from "./pages/admin/EditArticle.tsx";
+import { ArticleList } from "./pages/admin/ArticleList.tsx";
 import { Toaster } from "sonner";
 
 const queryClient = new QueryClient();
@@ -41,6 +44,7 @@ function App() {
             <Route path="terrassement" element={<Earthwork />} />
             <Route path="realisations" element={<Projects />} />
             <Route path="contact" element={<Contact />} />
+            <Route path="articles/:slug" element={<ArticleDetail />} />
           </Route>
 
           <Route path="/login" element={<Login />} />
@@ -55,6 +59,8 @@ function App() {
               <Route path="renovation" element={<EditRenovation />} />
               <Route path="terrassement" element={<EditEarthwork />} />
               <Route path="realisations" element={<EditProjects />} />
+              <Route path="articles" element={<ArticleList />} />
+              <Route path="articles/edit/:slug" element={<EditArticle />} />
               {/* Ajout des routes manquantes qui causaient l'erreur console */}
               <Route
                 path="products"

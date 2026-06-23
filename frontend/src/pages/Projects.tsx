@@ -2,7 +2,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../lib/axios";
-import { Loader2 } from "lucide-react";
+import { ChevronRight, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const Projects = () => {
   const [filter, setFilter] = useState("Tous");
@@ -145,6 +146,16 @@ export const Projects = () => {
                 <p className="text-gray-600 leading-relaxed text-lg">
                   {article.text}
                 </p>
+                {/* --- LE BOUTON VOIR PLUS --- */}
+                {article.slug && (
+                  <Link
+                    to={`/article/${article.slug}`}
+                    className="inline-flex items-center text-primary font-bold text-sm tracking-widest uppercase group"
+                  >
+                    En savoir plus
+                    <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                )}
               </motion.div>
               <div
                 className={`relative aspect-video md:aspect-square overflow-hidden rounded-sm shadow-2xl ${i % 2 !== 0 ? "md:order-1" : ""}`}
