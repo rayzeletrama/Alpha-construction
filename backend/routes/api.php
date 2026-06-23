@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\SettingsController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\LeadController;
+use App\Http\Controllers\Api\V1\ArticleController;
 
 Route::get('/health', function () {
     return response()->json(['status' => 'ok', 'laravel_version' => app()->version()]);
@@ -30,6 +31,8 @@ Route::middleware(['tenant'])->group(function () {
     Route::get('/v1/pages/{slug}', [PageController::class, 'show']);
 
     Route::post('/v1/leads', [LeadController::class, 'store'])->middleware('tenant');
+
+    Route::get('/v1/articles/{slug}', [ArticleController::class, 'show']);
 
     Route::get('/v1/projects', function() {
         return \App\Models\Project::all();
@@ -56,6 +59,12 @@ Route::middleware(['tenant'])->group(function () {
             Route::post('/v1/products', [ProductController::class, 'store']);
             Route::put('/v1/products/{product}', [ProductController::class, 'update']);
             Route::delete('/v1/products/{product}', [ProductController::class, 'destroy']);
+
+            // GESTION DES ARTICLES (C'est ce qui manquait !)
+            Route::get('/v1/articles', [ArticleController::class, 'index']);      // Liste
+            Route::post('/v1/articles', [ArticleController::class, 'store']);    // Créer (Publier)
+            Route::put('/v1/articles/{id}', [ArticleController::class, 'update']); // Modifier
+            Route::delete('/v1/articles/{id}', [ArticleController::class, 'destroy']); // Supprimer
         });
     });
 });
