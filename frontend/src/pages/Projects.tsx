@@ -132,7 +132,7 @@ export const Projects = () => {
       {/* ARTICLES DYNAMIQUES */}
       <section className="py-24 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto space-y-32">
-          {content.articles.map((article: any, i: number) => (
+          {content.articles?.map((article: any, i: number) => (
             <div key={i} className="grid md:grid-cols-2 gap-16 items-center">
               <motion.div
                 className={`space-y-6 ${i % 2 !== 0 ? "md:order-2" : ""}`}
