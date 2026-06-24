@@ -47,8 +47,7 @@ function App() {
             <Route path="realisations" element={<Projects />} />
             <Route path="contact" element={<Contact />} />
             <Route path="article/:slug" element={<ArticleDetail />} />
-            <Route path="mentions-legales" element={<LegalPage />} />
-            <Route path="confidentialite" element={<LegalPage />} />
+            <Route path="legal/:slug" element={<LegalPage />} />
           </Route>
 
           <Route path="/login" element={<Login />} />

@@ -15,6 +15,8 @@ import {
   Linkedin,
   Instagram,
   Facebook,
+  Trash2,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import imageCompression from "browser-image-compression";
@@ -37,6 +39,8 @@ export const Settings = () => {
         logo_url: data.settings?.logo_url || "",
         favicon_url: data.settings?.favicon_url || "",
         primary_color: data.settings?.primary_color || "#0056D2",
+        why_us: data.settings?.why_us || [],
+        partners: data.settings?.partners || [],
         socials: {
           facebook: data.settings?.socials?.facebook || "",
           instagram: data.settings?.socials?.instagram || "",
@@ -320,7 +324,7 @@ export const Settings = () => {
       {/* SECTION WHY US & PARTENAIRES */}
       <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* GESTION WHY US */}
-        <section className="bg-white p-8 rounded-sm shadow-sm border border-gray-100 space-y-6">
+        <section className="bg-white p-6 rounded-sm shadow-sm border border-gray-100 space-y-6 lg:col-span-2">
           <div className="flex justify-between items-center">
             <h2 className="font-bold uppercase text-xs text-primary tracking-widest">
               Nos Piliers (Why Us)
@@ -330,21 +334,21 @@ export const Settings = () => {
                 setForm({
                   ...form,
                   why_us: [
-                    ...(form.why_us || []),
+                    ...form.why_us,
                     { icon: "ShieldCheck", title: "", desc: "" },
                   ],
                 })
               }
-              className="text-primary font-bold text-[10px] uppercase"
+              className="bg-black text-white px-4 py-1 text-[10px] font-bold rounded-sm"
             >
-              + Ajouter
+              + AJOUTER
             </button>
           </div>
-          <div className="space-y-4">
-            {form.why_us?.map((item: any, i: number) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {form.why_us.map((item: any, i: number) => (
               <div
                 key={i}
-                className="p-4 bg-gray-50 rounded-sm space-y-2 relative"
+                className="p-4 bg-gray-50 border rounded-sm relative group space-y-2"
               >
                 <button
                   onClick={() =>
@@ -355,12 +359,12 @@ export const Settings = () => {
                       ),
                     })
                   }
-                  className="absolute top-2 right-2 text-red-400"
+                  className="absolute top-2 right-2 text-red-400 opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 size={14} />
                 </button>
                 <input
-                  placeholder="Icon Name (ex: HardHat)"
+                  placeholder="Icon (ex: ShieldCheck)"
                   className="w-full p-2 text-[10px] font-mono border"
                   value={item.icon}
                   onChange={(e) => {
@@ -396,7 +400,7 @@ export const Settings = () => {
         </section>
 
         {/* GESTION PARTENAIRES */}
-        <section className="bg-white p-8 rounded-sm shadow-sm border border-gray-100 space-y-6">
+        <section className="bg-white p-6 rounded-sm shadow-sm border border-gray-100 space-y-6 lg:col-span-2">
           <div className="flex justify-between items-center">
             <h2 className="font-bold uppercase text-xs text-primary tracking-widest">
               Partenaires
@@ -405,22 +409,19 @@ export const Settings = () => {
               onClick={() =>
                 setForm({
                   ...form,
-                  partners: [
-                    ...(form.partners || []),
-                    { name: "", logo: "", url: "" },
-                  ],
+                  partners: [...form.partners, { name: "", logo: "", url: "" }],
                 })
               }
-              className="text-primary font-bold text-[10px] uppercase"
+              className="bg-black text-white px-4 py-1 text-[10px] font-bold rounded-sm"
             >
-              + Ajouter
+              + AJOUTER
             </button>
           </div>
-          <div className="space-y-4">
-            {form.partners?.map((p: any, i: number) => (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {form.partners.map((p: any, i: number) => (
               <div
                 key={i}
-                className="p-4 bg-gray-50 rounded-sm space-y-2 relative"
+                className="p-3 bg-gray-50 border rounded-sm relative group space-y-2"
               >
                 <button
                   onClick={() =>
@@ -431,13 +432,18 @@ export const Settings = () => {
                       ),
                     })
                   }
-                  className="absolute top-2 right-2 text-red-400"
+                  className="absolute -top-2 -right-2 bg-white shadow-sm p-1 rounded-full text-red-400 opacity-0 group-hover:opacity-100"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={12} />
                 </button>
+                <div className="h-10 bg-white border flex items-center justify-center overflow-hidden mb-2">
+                  {p.logo && (
+                    <img src={p.logo} className="h-6 object-contain" />
+                  )}
+                </div>
                 <input
-                  placeholder="Nom du partenaire"
-                  className="w-full p-2 text-xs border"
+                  placeholder="Nom"
+                  className="w-full p-1 text-[9px] border"
                   value={p.name}
                   onChange={(e) => {
                     const n = [...form.partners];
@@ -446,8 +452,8 @@ export const Settings = () => {
                   }}
                 />
                 <input
-                  placeholder="URL du Logo"
-                  className="w-full p-2 text-[10px] border"
+                  placeholder="Lien Logo"
+                  className="w-full p-1 text-[9px] border"
                   value={p.logo}
                   onChange={(e) => {
                     const n = [...form.partners];
