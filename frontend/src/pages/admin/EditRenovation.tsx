@@ -14,8 +14,8 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Modal } from "../../components/admin/Modal";
 import { Link } from "react-router-dom";
+import { Modal } from "@/src/components/admin/Modals";
 
 export const EditRenovation = () => {
   const queryClient = useQueryClient();
