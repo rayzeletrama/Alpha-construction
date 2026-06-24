@@ -59,7 +59,7 @@ export const EditMasonry = () => {
 
     setUploadingField(index !== undefined ? `${path}-${index}` : path);
     const data = new FormData();
-    formData.append("file", file);
+    data.append("file", file);
 
     try {
       const res = await api.post("/v1/upload", data, {

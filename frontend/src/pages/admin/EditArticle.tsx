@@ -11,30 +11,32 @@ import {
   Upload,
   AlignLeft,
   HelpCircle,
+  Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
 export const EditArticle = () => {
-  const { slug } = useParams();
+  const { slug: currentSlug } = useParams(); // Renommé pour ne pas confondre avec le champ slug du form
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const isEdit = Boolean(slug);
+  const isEdit = Boolean(currentSlug);
 
   const [form, setForm] = useState<any>({
     title: "",
+    slug: "", // Ajout du champ slug dans l'état initial
     category: "Maçonnerie",
     subtitle: "",
     full_description: "",
     main_image: "",
-    sections: [], // Titres + Paragraphes
-    faqs: [], // Questions + Réponses
+    sections: [],
+    faqs: [],
   });
 
   const [isUploading, setIsUploading] = useState(false);
 
   const { data: article, isLoading } = useQuery({
-    queryKey: ["article", slug],
-    queryFn: async () => (await api.get(`/v1/articles/${slug}`)).data,
+    queryKey: ["article", currentSlug],
+    queryFn: async () => (await api.get(`/v1/articles/${currentSlug}`)).data,
     enabled: isEdit,
   });
 
@@ -58,52 +60,46 @@ export const EditArticle = () => {
       toast.success(isEdit ? "Article mis à jour" : "Article publié !");
       navigate("/admin/articles");
     },
-    onError: () => toast.error("Une erreur est survenue"),
+    onError: () => toast.error("Erreur d'enregistrement"),
   });
 
-  // --- LOGIQUE SECTIONS ---
   const addSection = () =>
     setForm({ ...form, sections: [...form.sections, { title: "", text: "" }] });
-
   const updateSection = (index: number, field: string, value: string) => {
     const newSections = [...form.sections];
     newSections[index][field] = value;
     setForm({ ...form, sections: newSections });
   };
-
-  const removeSection = (index: number) => {
+  const removeSection = (index: number) =>
     setForm({
       ...form,
       sections: form.sections.filter((_: any, i: number) => i !== index),
     });
-  };
 
-  // --- LOGIQUE FAQ ---
   const addFaq = () =>
     setForm({ ...form, faqs: [...form.faqs, { question: "", answer: "" }] });
-
   const updateFaq = (index: number, field: string, value: string) => {
     const newFaqs = [...form.faqs];
     newFaqs[index][field] = value;
     setForm({ ...form, faqs: newFaqs });
   };
-
-  const removeFaq = (index: number) => {
+  const removeFaq = (index: number) =>
     setForm({
       ...form,
       faqs: form.faqs.filter((_: any, i: number) => i !== index),
     });
-  };
 
-  // --- GESTION IMAGE ---
+  // ✅ CORRECTION DU BUG D'UPLOAD
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
+
+    const data = new FormData(); // Création de l'objet FormData
+    data.append("file", file); // On utilise 'data' et non 'formData'
+
     try {
-      const res = await api.post("/v1/upload", formData);
+      const res = await api.post("/v1/upload", data);
       setForm({ ...form, main_image: res.data.url });
       toast.success("Image téléchargée");
     } catch (err) {
@@ -138,7 +134,7 @@ export const EditArticle = () => {
         <button
           onClick={() => mutation.mutate(form)}
           disabled={mutation.isPending}
-          className="w-full md:w-auto bg-primary text-white px-10 py-4 rounded-sm font-bold flex items-center justify-center gap-3 hover:brightness-110 shadow-xl"
+          className="bg-primary text-white px-10 py-4 rounded-sm font-bold flex items-center justify-center gap-3 hover:brightness-110 shadow-xl"
         >
           {mutation.isPending ? (
             <Loader2 className="animate-spin w-5 h-5" />
@@ -150,24 +146,31 @@ export const EditArticle = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* COLONNE GAUCHE : INFOS & IMAGE */}
+        {/* COLONNE GAUCHE */}
         <div className="lg:col-span-2 space-y-10">
           <section className="bg-white p-8 rounded-sm shadow-sm border border-gray-100 space-y-6">
             <h2 className="font-bold uppercase text-xs text-primary tracking-widest flex items-center gap-2">
               Configuration de base
             </h2>
             <div className="space-y-4">
+              {/* CHAMP SLUG AJOUTÉ ICI */}
+              <div className="bg-blue-50/50 p-4 border border-blue-100 rounded-sm">
+                <label className="text-[10px] font-black text-blue-500 uppercase flex items-center gap-1 mb-1">
+                  <LinkIcon size={12} /> Identifiant URL (Slug unique)
+                </label>
+                <input
+                  placeholder="ex: renovation-piscine-luxe"
+                  className="w-full p-2 bg-white border border-blue-100 outline-none focus:border-primary font-mono text-sm"
+                  value={form.slug}
+                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                />
+              </div>
+
               <input
-                placeholder="Titre de l'article (ex: Maçonnerie de Pierre)"
+                placeholder="Titre de l'article"
                 className="w-full p-4 bg-gray-50 border border-gray-100 outline-none focus:border-primary font-bold text-xl"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-              />
-              <input
-                placeholder="Sous-titre accrocheur"
-                className="w-full p-3 bg-gray-50 border border-gray-100 outline-none focus:border-primary text-sm"
-                value={form.subtitle}
-                onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
               />
               <div className="relative group aspect-video bg-gray-100 rounded-sm overflow-hidden border">
                 {form.main_image ? (
@@ -183,9 +186,7 @@ export const EditArticle = () => {
                 <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white">
                   <Upload size={24} className="mb-2" />
                   <span className="font-bold text-xs uppercase">
-                    {isUploading
-                      ? "Transfert..."
-                      : "Changer l'image principale"}
+                    {isUploading ? "Transfert..." : "Changer l'image"}
                   </span>
                   <input
                     type="file"
@@ -197,12 +198,11 @@ export const EditArticle = () => {
             </div>
           </section>
 
-          {/* SECTIONS DYNAMIQUES */}
+          {/* SECTIONS DYNAMIQUES (Le corps de l'article) */}
           <section className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center px-2">
               <h2 className="font-black uppercase text-xl tracking-tighter flex items-center gap-2">
-                <AlignLeft className="text-primary" /> Corps de l'article
-                (Sections)
+                <AlignLeft className="text-primary" /> Sections détaillées
               </h2>
               <button
                 onClick={addSection}
@@ -211,12 +211,11 @@ export const EditArticle = () => {
                 <Plus size={14} /> AJOUTER UN PARAGRAPHE
               </button>
             </div>
-
             <div className="space-y-6">
               {form.sections.map((sect: any, i: number) => (
                 <div
                   key={i}
-                  className="bg-white p-6 rounded-sm border border-gray-100 shadow-sm relative group"
+                  className="bg-white p-6 rounded-sm border border-gray-100 shadow-sm relative group space-y-4"
                 >
                   <button
                     onClick={() => removeSection(i)}
@@ -224,39 +223,35 @@ export const EditArticle = () => {
                   >
                     <Trash2 size={18} />
                   </button>
-                  <div className="space-y-4">
-                    <input
-                      placeholder="Titre de la section (ex: Matériaux utilisés)"
-                      className="w-full p-2 border-b border-gray-100 font-bold uppercase text-sm outline-none focus:border-primary bg-transparent"
-                      value={sect.title}
-                      onChange={(e) =>
-                        updateSection(i, "title", e.target.value)
-                      }
-                    />
-                    <textarea
-                      placeholder="Développez votre explication technique ici..."
-                      className="w-full p-3 bg-gray-50 border-none text-sm leading-relaxed outline-none focus:bg-white transition-all"
-                      rows={4}
-                      value={sect.text}
-                      onChange={(e) => updateSection(i, "text", e.target.value)}
-                    />
-                  </div>
+                  <input
+                    placeholder="Titre de section"
+                    className="w-full p-2 border-b border-gray-100 font-bold uppercase text-sm outline-none focus:border-primary bg-transparent"
+                    value={sect.title}
+                    onChange={(e) => updateSection(i, "title", e.target.value)}
+                  />
+                  <textarea
+                    placeholder="Texte..."
+                    className="w-full p-3 bg-gray-50 border-none text-sm outline-none focus:bg-white"
+                    rows={4}
+                    value={sect.text}
+                    onChange={(e) => updateSection(i, "text", e.target.value)}
+                  />
                 </div>
               ))}
             </div>
           </section>
         </div>
 
-        {/* COLONNE DROITE : DESCRIPTION & FAQ */}
+        {/* COLONNE DROITE : FAQ */}
         <div className="space-y-10">
-          <section className="bg-white p-6 md:p-8 rounded-sm shadow-sm border border-gray-100 space-y-4">
+          <section className="bg-white p-8 rounded-sm shadow-sm border border-gray-100 space-y-4">
             <h2 className="font-bold uppercase text-xs text-gray-400 tracking-widest">
-              Résumé / Présentation
+              Résumé
             </h2>
             <textarea
-              placeholder="Texte d'introduction de la page détail..."
-              className="w-full p-3 bg-gray-50 border-none text-sm italic outline-none focus:bg-white"
-              rows={6}
+              placeholder="Texte court..."
+              className="w-full p-3 bg-gray-50 border-none text-sm outline-none"
+              rows={4}
               value={form.full_description}
               onChange={(e) =>
                 setForm({ ...form, full_description: e.target.value })
@@ -265,46 +260,43 @@ export const EditArticle = () => {
           </section>
 
           <section className="space-y-6">
-            <div className="flex justify-between items-center px-2">
-              <h2 className="font-bold uppercase text-xs text-gray-400 tracking-widest flex items-center gap-2">
-                <HelpCircle size={14} /> FAQ
+            <div className="flex justify-between items-center">
+              <h2 className="font-bold uppercase text-xs text-gray-400 tracking-widest">
+                FAQ
               </h2>
               <button
                 onClick={addFaq}
-                className="text-primary font-bold text-[10px] uppercase hover:underline"
+                className="text-primary font-bold text-[10px] uppercase"
               >
                 + Ajouter
               </button>
             </div>
-
-            <div className="space-y-4">
-              {form.faqs.map((faq: any, i: number) => (
-                <div
-                  key={i}
-                  className="bg-white p-4 rounded-sm border border-gray-100 shadow-sm space-y-2 relative group"
+            {form.faqs.map((faq: any, i: number) => (
+              <div
+                key={i}
+                className="bg-white p-4 rounded-sm border border-gray-100 shadow-sm space-y-2 relative group"
+              >
+                <button
+                  onClick={() => removeFaq(i)}
+                  className="absolute top-2 right-2 text-red-200 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                 >
-                  <button
-                    onClick={() => removeFaq(i)}
-                    className="absolute top-2 right-2 text-red-200 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                  <input
-                    placeholder="Question ?"
-                    className="w-full text-xs font-bold border-b border-gray-50 outline-none focus:border-primary py-1"
-                    value={faq.question}
-                    onChange={(e) => updateFaq(i, "question", e.target.value)}
-                  />
-                  <textarea
-                    placeholder="Réponse..."
-                    className="w-full text-[11px] text-gray-500 bg-gray-50 p-2 outline-none"
-                    rows={2}
-                    value={faq.answer}
-                    onChange={(e) => updateFaq(i, "answer", e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
+                  <Trash2 size={14} />
+                </button>
+                <input
+                  placeholder="Question ?"
+                  className="w-full text-xs font-bold border-b border-gray-50 outline-none"
+                  value={faq.question}
+                  onChange={(e) => updateFaq(i, "question", e.target.value)}
+                />
+                <textarea
+                  placeholder="Réponse..."
+                  className="w-full text-[11px] text-gray-500 bg-gray-50 p-2"
+                  rows={2}
+                  value={faq.answer}
+                  onChange={(e) => updateFaq(i, "answer", e.target.value)}
+                />
+              </div>
+            ))}
           </section>
         </div>
       </div>
