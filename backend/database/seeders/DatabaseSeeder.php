@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Tenant;
+use App\Models\Page;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -13,19 +14,12 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // 1. Créer les rôles de base (Spatie Permission)
-        // On utilise 'web' car Sanctum s'appuie sur le guard par défaut
         $adminRole = Role::updateOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $managerRole = Role::updateOrCreate(['name' => 'manager', 'guard_name' => 'web']);
         $customerRole = Role::updateOrCreate(['name' => 'customer', 'guard_name' => 'web']);
 
-        // 2. Créer le premier Tenant (Boutique Alpha)
-        // On utilise 'localhost' pour le développement local
         $tenant = Tenant::updateOrCreate(
             ['slug' => 'alpha'],
             [
@@ -33,8 +27,10 @@ class DatabaseSeeder extends Seeder
                 'domain' => 'alpha-construction-qpi.onrender.com',
                 'plan' => 'enterprise',
                 'settings' => [
-                    'logo_url' => null, // null = affichage du texte "ALPHA"
-                    'primary_color' => '#0056D2', // Bleu de ton index.css
+                    'logo_url' => null,
+                    'favicon_url' => null,
+                    'browser_title' => 'Alpha - Excellence du Bâtiment',
+                    'primary_color' => '#0056D2',
                     'socials' => [
                         'facebook' => 'https://facebook.com/alphaconstruction',
                         'instagram' => 'https://instagram.com/alphaconstruction',
@@ -43,47 +39,45 @@ class DatabaseSeeder extends Seeder
                     'contact' => [
                         'address' => "12 Rue de l'Innovation, 75008 Paris",
                         'phone' => '+261 34 41 959 90',
-                        'email' => 'rivonirina.ra@gmail.com'
+                        'email' => 'rayzeletrama8@gmail.com'
+                    ],
+                    // --- 5 PILIERS WHY US ---
+                    'why_us' => [
+                        ['icon' => 'ShieldCheck', 'title' => 'Qualité', 'desc' => 'Une sélection rigoureuse des matériaux et une exécution sans compromis.'],
+                        ['icon' => 'History', 'title' => 'Expérience', 'desc' => 'Plus de 15 ans de savoir-faire technique au service de vos projets.'],
+                        ['icon' => 'Clock', 'title' => 'Délais', 'desc' => 'Une gestion de projet optimisée pour respecter vos échéances.'],
+                        ['icon' => 'MessageSquare', 'title' => 'Écoute', 'desc' => 'Un interlocuteur unique pour une compréhension totale de vos besoins.'],
+                        ['icon' => 'HardHat', 'title' => 'Sécurité', 'desc' => 'Le respect strict des normes de sécurité sur tous nos chantiers.']
+                    ],
+                    // --- 5 PARTENAIRES ---
+                    'partners' => [
+                        ['name' => 'Lafarge', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/LafargeHolcim_logo.svg/2560px-LafargeHolcim_logo.svg.png', 'url' => '#'],
+                        ['name' => 'Point.P', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo_Point.P.svg/1200px-Logo_Point.P.svg.png', 'url' => '#'],
+                        ['name' => 'Hilti', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Hilti_logo.svg/1280px-Hilti_logo.svg.png', 'url' => '#'],
+                        ['name' => 'Saint-Gobain', 'logo' => 'https://upload.wikimedia.org/wikipedia/fr/thumb/a/a4/Saint-Gobain_logo_2016.svg/1200px-Saint-Gobain_logo_2016.svg.png', 'url' => '#'],
+                        ['name' => 'Caterpillar', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Caterpillar_logo.svg/2560px-Caterpillar_logo.svg.png', 'url' => '#']
                     ]
                 ]
             ]
         );
 
-        // --- IMPORTANT ---
-        // On injecte le tenant actuel dans l'application.
-        // Sans cette ligne, le Trait 'BelongsToTenant' ne saura pas quel
-        // ID assigner aux pages et projets créés ci-dessous.
         app()->instance('currentTenant', $tenant);
 
-        // 3. Créer l'utilisateur Administrateur (Toi)
         $admin = User::updateOrCreate(
             ['email' => 'admin@alpha.com'],
-            [
-                'name' => 'Beru Admin',
-                'password' => Hash::make('password'), // À changer après la première connexion
-                'tenant_id' => $tenant->id,
-            ]
+            ['name' => 'Beru Admin', 'password' => Hash::make('password'), 'tenant_id' => $tenant->id]
         );
-
-        // Assigner le rôle admin à l'utilisateur
         $admin->assignRole($adminRole);
 
-        // 4. Appel des Seeders de contenu dynamique
-        // Chaque seeder va remplir les textes/images de chaque page
         $this->call([
             ArticleSeeder::class,
             HomePageSeeder::class,
-            ContactPageSeeder::class,
             MasonryPageSeeder::class,
             RenovationPageSeeder::class,
             EarthworkPageSeeder::class,
+            ContactPageSeeder::class,
             ProjectsPageSeeder::class,
+            LegalPagesSeeder::class, // Assure-toi que ce seeder existe
         ]);
-
-        $this->command->info('-----------------------------------------------');
-        $this->command->info('  SaaS Alpha initialisé avec succès !');
-        $this->command->info('  Email : admin@alpha.com');
-        $this->command->info('  Password : password');
-        $this->command->info('-----------------------------------------------');
     }
 }
