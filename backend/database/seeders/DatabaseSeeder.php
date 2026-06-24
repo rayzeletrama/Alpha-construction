@@ -27,10 +27,10 @@ class DatabaseSeeder extends Seeder
         // 2. Créer le premier Tenant (Boutique Alpha)
         // On utilise 'localhost' pour le développement local
         $tenant = Tenant::updateOrCreate(
-            ['slug' => 'localhost'],
+            ['slug' => 'alpha'],
             [
                 'name' => 'ALPHA CONSTRUCTION',
-                'domain' => 'localhost',
+                'domain' => 'alpha-construction-qpi.onrender.com',
                 'plan' => 'enterprise',
                 'settings' => [
                     'logo_url' => null, // null = affichage du texte "ALPHA"
@@ -42,8 +42,8 @@ class DatabaseSeeder extends Seeder
                     ],
                     'contact' => [
                         'address' => "12 Rue de l'Innovation, 75008 Paris",
-                        'phone' => '01 02 03 04 05',
-                        'email' => 'contact@alpha-business.fr'
+                        'phone' => '+261 34 41 959 90',
+                        'email' => 'rivonirina.ra@gmail.com'
                     ]
                 ]
             ]
@@ -71,13 +71,13 @@ class DatabaseSeeder extends Seeder
         // 4. Appel des Seeders de contenu dynamique
         // Chaque seeder va remplir les textes/images de chaque page
         $this->call([
+            ArticleSeeder::class,
             HomePageSeeder::class,
             ContactPageSeeder::class,
             MasonryPageSeeder::class,
             RenovationPageSeeder::class,
             EarthworkPageSeeder::class,
             ProjectsPageSeeder::class,
-            ArticleSeeder::class,
         ]);
 
         $this->command->info('-----------------------------------------------');

@@ -38,6 +38,7 @@ class RenovationPageSeeder extends Seeder
                         [
                             'badge' => 'Focus Rénovation 01',
                             'title' => 'Réaménagement & Design',
+                            'slug' => 'renovation-design',
                             'text' => "Repenser l'espace pour l'adapter à de nouveaux usages est notre spécialité. Nous abattons les cloisons inutiles, créons des ouvertures lumineuses et optimisons chaque mètre carré.",
                             'image' => 'https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?q=80&w=2070'
                         ],

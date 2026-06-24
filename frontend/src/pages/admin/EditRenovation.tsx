@@ -11,9 +11,10 @@ import {
   Type,
   CheckCircle2,
   ArrowLeft,
+  Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Modal } from "@/src/components/admin/Modals";
+import { Modal } from "../../components/admin/Modal";
 import { Link } from "react-router-dom";
 
 export const EditRenovation = () => {
@@ -22,10 +23,11 @@ export const EditRenovation = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
 
-  // État pour un nouvel article technique (Rénovation)
+  // État pour un nouvel article technique via la Modal
   const [newArticle, setNewArticle] = useState({
     badge: "Focus Rénovation",
     title: "",
+    slug: "", // Nouveau : pour lier à l'article détaillé
     text: "",
     image: "https://images.unsplash.com/photo-1484154218962-a197022b5858",
   });
@@ -83,7 +85,7 @@ export const EditRenovation = () => {
         setFormData({ ...formData, articles: newArticles });
       }
 
-      toast.success("Image mise à jour avec succès");
+      toast.success("Image mise à jour");
     } catch (err) {
       toast.error("Erreur lors de l'upload");
     } finally {
@@ -99,8 +101,8 @@ export const EditRenovation = () => {
     );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-10 pb-20">
-      {/* HEADER STRATÉGIQUE */}
+    <div className="max-w-6xl mx-auto space-y-10 pb-20 px-4 md:px-0">
+      {/* HEADER ACTIONS */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
         <div>
           <Link
@@ -109,51 +111,45 @@ export const EditRenovation = () => {
           >
             <ArrowLeft size={12} /> Voir la page publique
           </Link>
-          <h1 className="text-3xl font-black tracking-tighter uppercase">
+          <h1 className="text-3xl font-black tracking-tighter uppercase text-black">
             Expertise : Rénovation
           </h1>
         </div>
         <button
           onClick={() => mutation.mutate(formData)}
           disabled={mutation.isPending}
-          className="w-full md:w-auto bg-primary text-white px-10 py-4 rounded-sm font-bold flex items-center justify-center gap-3 hover:brightness-110 shadow-xl shadow-primary/20 transition-all"
+          className="w-full md:w-auto bg-primary text-white px-10 py-4 rounded-sm font-bold flex items-center justify-center gap-3 hover:brightness-110 shadow-xl shadow-primary/20 transition-all disabled:opacity-50"
         >
           {mutation.isPending ? (
             <Loader2 className="animate-spin w-5 h-5" />
           ) : (
             <Save size={20} />
           )}
-          SAUVEGARDER LES MODIFICATIONS
+          ENREGISTRER
         </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* COLONNE GAUCHE (70%) : CONTENU VISUEL ET TEXTUEL */}
         <div className="lg:col-span-2 space-y-10">
           {/* SECTION HERO */}
           <section className="bg-white p-8 rounded-sm shadow-sm border border-gray-100">
             <h2 className="font-bold uppercase text-xs text-primary tracking-widest mb-6 flex items-center gap-2">
-              <ImageIcon size={16} /> Section Hero (Bannière)
+              <ImageIcon size={16} /> Bannière Hero
             </h2>
             <div className="space-y-6">
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase block mb-1">
-                  Titre de la bannière
-                </label>
-                <input
-                  className="w-full p-4 bg-gray-50 border border-gray-100 outline-none focus:border-primary font-bold text-xl"
-                  value={formData.hero.title || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      hero: { ...formData.hero, title: e.target.value },
-                    })
-                  }
-                />
-              </div>
+              <input
+                className="w-full p-4 bg-gray-50 border border-gray-100 outline-none focus:border-primary font-bold text-xl"
+                value={formData.hero?.title || ""}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    hero: { ...formData.hero, title: e.target.value },
+                  })
+                }
+              />
               <div className="relative group aspect-video bg-gray-100 rounded-sm overflow-hidden border">
                 <img
-                  src={formData.hero.image}
+                  src={formData.hero?.image}
                   className="w-full h-full object-cover"
                 />
                 <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white">
@@ -173,16 +169,15 @@ export const EditRenovation = () => {
             </div>
           </section>
 
-          {/* SECTION INTRODUCTION & PHOTOS DE CHANTIER */}
+          {/* SECTION INTRODUCTION */}
           <section className="bg-white p-8 rounded-sm shadow-sm border border-gray-100">
             <h2 className="font-bold uppercase text-xs text-black tracking-widest mb-6 flex items-center gap-2">
-              <Type size={16} /> Présentation et Images d'introduction
+              <Type size={16} /> Présentation & Photos
             </h2>
             <div className="space-y-6">
               <input
                 className="w-full p-4 bg-gray-50 border border-gray-100 outline-none focus:border-primary font-bold"
-                placeholder="Titre d'introduction"
-                value={formData.intro.title || ""}
+                value={formData.intro?.title || ""}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -193,8 +188,7 @@ export const EditRenovation = () => {
               <textarea
                 className="w-full p-4 bg-gray-50 border border-gray-100 outline-none focus:border-primary text-sm leading-relaxed"
                 rows={5}
-                placeholder="Texte de présentation..."
-                value={formData.intro.text || ""}
+                value={formData.intro?.text || ""}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -202,9 +196,8 @@ export const EditRenovation = () => {
                   })
                 }
               />
-
               <div className="grid grid-cols-2 gap-6 pt-4">
-                {formData.intro.images.map((img: string, idx: number) => (
+                {formData.intro?.images?.map((img: string, idx: number) => (
                   <div
                     key={idx}
                     className="relative group aspect-[3/4] bg-gray-50 border rounded-sm overflow-hidden"
@@ -230,19 +223,18 @@ export const EditRenovation = () => {
           </section>
         </div>
 
-        {/* COLONNE DROITE (30%) : LISTE DES SERVICES */}
+        {/* SIDEBAR : SERVICES */}
         <div className="space-y-8">
           <section className="bg-white p-8 rounded-sm shadow-sm border border-gray-100">
             <h2 className="font-bold uppercase text-xs text-gray-400 tracking-widest mb-6 flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-primary" /> Liste des
-              services
+              <CheckCircle2 size={16} className="text-primary" /> Prestations
             </h2>
             <div className="space-y-4">
-              {formData.intro.services.map((s: string, i: number) => (
+              {formData.intro?.services?.map((s: string, i: number) => (
                 <div key={i} className="flex items-center gap-3 group">
                   <input
                     className="flex-1 text-sm font-bold py-2 bg-transparent border-b border-gray-100 focus:border-primary outline-none"
-                    value={s}
+                    value={s || ""}
                     onChange={(e) => {
                       const newS = [...formData.intro.services];
                       newS[i] = e.target.value;
@@ -262,7 +254,7 @@ export const EditRenovation = () => {
                         intro: { ...formData.intro, services: newS },
                       });
                     }}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-600 transition-all"
+                    className="opacity-0 group-hover:opacity-100 text-red-400"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -283,36 +275,36 @@ export const EditRenovation = () => {
                 }
                 className="w-full mt-4 py-3 border-2 border-dashed border-gray-100 text-[10px] font-black uppercase text-gray-400 hover:border-primary hover:text-primary transition-all"
               >
-                + Ajouter une prestation
+                + Ajouter une ligne
               </button>
             </div>
           </section>
         </div>
       </div>
 
-      {/* SECTION ARTICLES DE TRANSFORMATION (Pleine largeur) */}
+      {/* ARTICLES DE TRANSFORMATION AVEC SLUG */}
       <section className="space-y-8">
         <div className="flex justify-between items-center border-t pt-10">
-          <h2 className="text-2xl font-black tracking-tighter uppercase">
-            L'Art de la Transformation (Articles)
+          <h2 className="text-2xl font-black tracking-tighter uppercase text-black">
+            Focus Rénovation (Articles)
           </h2>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-black text-white px-6 py-2 rounded-sm font-bold text-xs flex items-center gap-2 hover:bg-primary transition-all shadow-lg shadow-black/10"
+            className="bg-black text-white px-6 py-2 rounded-sm font-bold text-xs flex items-center gap-2 hover:bg-primary transition-all"
           >
-            <Plus size={16} /> AJOUTER UN FOCUS
+            <Plus size={16} /> NOUVEAU FOCUS
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {formData.articles.map((art: any, i: number) => (
+          {formData.articles?.map((art: any, i: number) => (
             <div
               key={i}
               className="bg-white p-8 rounded-sm shadow-sm border border-gray-100 relative group flex flex-col gap-6"
             >
               <button
                 onClick={() => {
-                  if (confirm("Supprimer cet article de rénovation ?")) {
+                  if (window.confirm("Supprimer cet article ?")) {
                     const newArt = formData.articles.filter(
                       (_: any, idx: number) => idx !== i,
                     );
@@ -326,7 +318,7 @@ export const EditRenovation = () => {
 
               <div className="flex flex-col sm:flex-row gap-6">
                 <div className="w-full sm:w-40">
-                  <div className="relative group aspect-square bg-gray-50 rounded-sm overflow-hidden border border-gray-100">
+                  <div className="relative group aspect-square bg-gray-50 rounded-sm overflow-hidden border">
                     <img
                       src={art.image}
                       className="w-full h-full object-cover"
@@ -342,6 +334,23 @@ export const EditRenovation = () => {
                   </div>
                 </div>
                 <div className="flex-1 space-y-4">
+                  {/* CHAMP SLUG POUR LIAISON DYNAMIQUE */}
+                  <div className="bg-blue-50/50 p-2 rounded-sm border border-blue-100">
+                    <label className="text-[9px] font-black text-blue-500 uppercase tracking-widest block mb-1">
+                      Slug de l'article détaillé
+                    </label>
+                    <input
+                      className="w-full text-xs font-mono bg-transparent outline-none focus:text-blue-700"
+                      placeholder="ex: renovation-design"
+                      value={art.slug || ""}
+                      onChange={(e) => {
+                        const newArtList = [...formData.articles];
+                        newArtList[i].slug = e.target.value;
+                        setFormData({ ...formData, articles: newArtList });
+                      }}
+                    />
+                  </div>
+
                   <input
                     className="w-full text-[10px] font-black text-primary uppercase tracking-widest bg-transparent border-b border-gray-50 outline-none"
                     value={art.badge || ""}
@@ -352,7 +361,7 @@ export const EditRenovation = () => {
                     }}
                   />
                   <input
-                    className="w-full font-bold text-lg outline-none focus:text-primary transition-colors"
+                    className="w-full font-bold text-lg outline-none"
                     value={art.title || ""}
                     onChange={(e) => {
                       const newArt = [...formData.articles];
@@ -361,7 +370,7 @@ export const EditRenovation = () => {
                     }}
                   />
                   <textarea
-                    className="w-full text-sm text-gray-500 bg-gray-50 p-4 rounded-sm outline-none focus:bg-white border border-transparent focus:border-gray-100 transition-all leading-relaxed"
+                    className="w-full text-sm text-gray-500 bg-gray-50 p-3 rounded-sm outline-none"
                     rows={4}
                     value={art.text || ""}
                     onChange={(e) => {
@@ -377,58 +386,49 @@ export const EditRenovation = () => {
         </div>
       </section>
 
-      {/* MODAL NOUVEL ARTICLE DE RÉNOVATION */}
+      {/* MODAL NOUVEL ARTICLE */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Nouvel Article Rénovation"
+        title="Nouvelle Expertise Rénovation"
       >
         <div className="space-y-5">
-          <div>
-            <label className="text-[10px] font-black text-gray-400 uppercase">
-              Titre de l'article
-            </label>
-            <input
-              className="w-full p-4 bg-gray-50 border border-gray-100 outline-none focus:border-primary font-bold mt-1"
-              placeholder="Ex: Rénovation énergétique..."
-              value={newArticle.title}
-              onChange={(e) =>
-                setNewArticle({ ...newArticle, title: e.target.value })
-              }
-            />
-          </div>
-          <div>
-            <label className="text-[10px] font-black text-gray-400 uppercase">
-              Description
-            </label>
-            <textarea
-              className="w-full p-4 bg-gray-50 border border-gray-100 outline-none focus:border-primary text-sm mt-1"
-              placeholder="Décrivez cette expertise..."
-              rows={5}
-              value={newArticle.text}
-              onChange={(e) =>
-                setNewArticle({ ...newArticle, text: e.target.value })
-              }
-            />
-          </div>
+          <input
+            className="w-full p-4 bg-gray-50 border border-gray-100 outline-none focus:border-primary font-bold"
+            placeholder="Titre de l'expertise"
+            value={newArticle.title}
+            onChange={(e) =>
+              setNewArticle({ ...newArticle, title: e.target.value })
+            }
+          />
+          <input
+            className="w-full p-4 bg-gray-50 border border-gray-100 outline-none focus:border-primary font-mono text-xs"
+            placeholder="Slug de l'article (ex: renovation-thermique)"
+            value={newArticle.slug}
+            onChange={(e) =>
+              setNewArticle({ ...newArticle, slug: e.target.value })
+            }
+          />
+          <textarea
+            className="w-full p-4 bg-gray-50 border border-gray-100 outline-none focus:border-primary text-sm"
+            placeholder="Description courte..."
+            rows={5}
+            value={newArticle.text}
+            onChange={(e) =>
+              setNewArticle({ ...newArticle, text: e.target.value })
+            }
+          />
           <button
             onClick={() => {
-              if (!newArticle.title) return toast.error("Le titre est requis");
+              if (!newArticle.title) return toast.error("Titre requis");
               setFormData({
                 ...formData,
                 articles: [...formData.articles, newArticle],
               });
               setIsModalOpen(false);
-              setNewArticle({
-                badge: "Focus Rénovation",
-                title: "",
-                text: "",
-                image:
-                  "https://images.unsplash.com/photo-1484154218962-a197022b5858",
-              });
-              toast.success("Article ajouté au brouillon");
+              toast.success("Expertise ajoutée au brouillon");
             }}
-            className="w-full bg-primary text-white py-5 font-black uppercase tracking-widest hover:brightness-110 shadow-lg shadow-primary/20 transition-all"
+            className="w-full bg-primary text-white py-5 font-black uppercase tracking-widest hover:brightness-110 shadow-lg"
           >
             CONFIRMER L'AJOUT
           </button>
