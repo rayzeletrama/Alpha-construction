@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import imageCompression from "browser-image-compression";
 
 export const EditHome = () => {
   const queryClient = useQueryClient();
@@ -57,6 +58,21 @@ export const EditHome = () => {
     uploadData.append("file", file);
 
     try {
+      // 1. OPTIONS DE COMPRESSION
+      const options = {
+        maxSizeMB: 1, // On réduit à 1Mo max
+        maxWidthOrHeight: 1920, // Full HD max
+        useWebWorker: true,
+      };
+
+      // 2. COMPRESSION
+      toast.info("Optimisation de l'image...");
+      const compressedFile = await imageCompression(file, options);
+
+      // 3. ENVOI
+      const uploadData = new FormData();
+      uploadData.append("file", compressedFile); // On envoie le fichier compressé
+
       const res = await api.post("/v1/upload", uploadData, {
         headers: { "Content-Type": "multipart/form-data" },
       });

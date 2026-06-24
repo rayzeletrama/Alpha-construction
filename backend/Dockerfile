@@ -12,6 +12,12 @@ RUN apt-get update && apt-get install -y \
 # 2. Installer les extensions PHP
 RUN docker-php-ext-install pdo_pgsql gd zip
 
+# Configuration PHP pour les gros fichiers
+RUN echo "upload_max_filesize=20M" > /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size=20M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "memory_limit=512M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "max_execution_time=300" >> /usr/local/etc/php/conf.d/uploads.ini
+
 # 3. Récupérer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
