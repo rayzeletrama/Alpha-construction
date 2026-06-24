@@ -29,6 +29,8 @@ class SettingsController extends Controller
             'settings.primary_color' => ['nullable', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'], // Correction ici
             'settings.socials' => 'nullable|array',
             'settings.contact' => 'nullable|array',
+            'settings.why_us' => 'nullable|array',
+            'settings.partners' => 'nullable|array',
         ]);
 
         $tenant->update([

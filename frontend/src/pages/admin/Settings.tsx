@@ -317,6 +317,149 @@ export const Settings = () => {
           </div>
         </section>
       </div>
+      {/* SECTION WHY US & PARTENAIRES */}
+      <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* GESTION WHY US */}
+        <section className="bg-white p-8 rounded-sm shadow-sm border border-gray-100 space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="font-bold uppercase text-xs text-primary tracking-widest">
+              Nos Piliers (Why Us)
+            </h2>
+            <button
+              onClick={() =>
+                setForm({
+                  ...form,
+                  why_us: [
+                    ...(form.why_us || []),
+                    { icon: "ShieldCheck", title: "", desc: "" },
+                  ],
+                })
+              }
+              className="text-primary font-bold text-[10px] uppercase"
+            >
+              + Ajouter
+            </button>
+          </div>
+          <div className="space-y-4">
+            {form.why_us?.map((item: any, i: number) => (
+              <div
+                key={i}
+                className="p-4 bg-gray-50 rounded-sm space-y-2 relative"
+              >
+                <button
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      why_us: form.why_us.filter(
+                        (_: any, idx: number) => idx !== i,
+                      ),
+                    })
+                  }
+                  className="absolute top-2 right-2 text-red-400"
+                >
+                  <Trash2 size={14} />
+                </button>
+                <input
+                  placeholder="Icon Name (ex: HardHat)"
+                  className="w-full p-2 text-[10px] font-mono border"
+                  value={item.icon}
+                  onChange={(e) => {
+                    const n = [...form.why_us];
+                    n[i].icon = e.target.value;
+                    setForm({ ...form, why_us: n });
+                  }}
+                />
+                <input
+                  placeholder="Titre"
+                  className="w-full p-2 text-xs font-bold border"
+                  value={item.title}
+                  onChange={(e) => {
+                    const n = [...form.why_us];
+                    n[i].title = e.target.value;
+                    setForm({ ...form, why_us: n });
+                  }}
+                />
+                <textarea
+                  placeholder="Description"
+                  className="w-full p-2 text-[11px] border"
+                  rows={2}
+                  value={item.desc}
+                  onChange={(e) => {
+                    const n = [...form.why_us];
+                    n[i].desc = e.target.value;
+                    setForm({ ...form, why_us: n });
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* GESTION PARTENAIRES */}
+        <section className="bg-white p-8 rounded-sm shadow-sm border border-gray-100 space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="font-bold uppercase text-xs text-primary tracking-widest">
+              Partenaires
+            </h2>
+            <button
+              onClick={() =>
+                setForm({
+                  ...form,
+                  partners: [
+                    ...(form.partners || []),
+                    { name: "", logo: "", url: "" },
+                  ],
+                })
+              }
+              className="text-primary font-bold text-[10px] uppercase"
+            >
+              + Ajouter
+            </button>
+          </div>
+          <div className="space-y-4">
+            {form.partners?.map((p: any, i: number) => (
+              <div
+                key={i}
+                className="p-4 bg-gray-50 rounded-sm space-y-2 relative"
+              >
+                <button
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      partners: form.partners.filter(
+                        (_: any, idx: number) => idx !== i,
+                      ),
+                    })
+                  }
+                  className="absolute top-2 right-2 text-red-400"
+                >
+                  <Trash2 size={14} />
+                </button>
+                <input
+                  placeholder="Nom du partenaire"
+                  className="w-full p-2 text-xs border"
+                  value={p.name}
+                  onChange={(e) => {
+                    const n = [...form.partners];
+                    n[i].name = e.target.value;
+                    setForm({ ...form, partners: n });
+                  }}
+                />
+                <input
+                  placeholder="URL du Logo"
+                  className="w-full p-2 text-[10px] border"
+                  value={p.logo}
+                  onChange={(e) => {
+                    const n = [...form.partners];
+                    n[i].logo = e.target.value;
+                    setForm({ ...form, partners: n });
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 };

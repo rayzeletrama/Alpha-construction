@@ -28,6 +28,7 @@ import { EditArticle } from "./pages/admin/EditArticle.tsx";
 import { ArticleList } from "./pages/admin/ArticleList.tsx";
 import { Toaster } from "sonner";
 import { Leads } from "./pages/admin/Leads.tsx";
+import { LegalPage } from "./pages/LegalPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,8 @@ function App() {
             <Route path="realisations" element={<Projects />} />
             <Route path="contact" element={<Contact />} />
             <Route path="article/:slug" element={<ArticleDetail />} />
+            <Route path="mentions-legales" element={<LegalPage />} />
+            <Route path="confidentialite" element={<LegalPage />} />
           </Route>
 
           <Route path="/login" element={<Login />} />
