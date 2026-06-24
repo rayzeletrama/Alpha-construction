@@ -25,11 +25,14 @@ class ArticleController extends Controller
             'category' => 'required|string',
             'full_description' => 'required|string',
             'main_image' => 'nullable|string',
+            'slug' => 'nullable|string',
             'sections' => 'nullable|array',
             'faqs' => 'nullable|array'
         ]);
 
-        $data['slug'] = Str::slug($data['title']);
+    $data['slug'] = $request->filled('slug')
+        ? Str::slug($request->slug)
+        : Str::slug($request->title);
         return Article::create($data);
     }
 
