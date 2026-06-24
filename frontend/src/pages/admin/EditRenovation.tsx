@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { Modal } from "@/src/components/admin/Modals";
+import imageCompression from "browser-image-compression";
 
 export const EditRenovation = () => {
   const queryClient = useQueryClient();
@@ -51,6 +52,7 @@ export const EditRenovation = () => {
     onError: () => toast.error("Erreur lors de la sauvegarde"),
   });
 
+  // ✅ GESTION DE L'UPLOAD AVEC COMPRESSION
   const handleImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     path: string,
@@ -60,11 +62,20 @@ export const EditRenovation = () => {
     if (!file) return;
 
     setUploadingField(index !== undefined ? `${path}-${index}` : path);
-    const data = new FormData();
-    data.append("file", file);
 
     try {
-      const res = await api.post("/v1/upload", data, {
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+      toast.info("Optimisation de l'image...");
+      const compressedFile = await imageCompression(file, options);
+
+      const uploadData = new FormData(); // ✅ Utilisation de uploadData pour éviter le bug
+      uploadData.append("file", compressedFile);
+
+      const res = await api.post("/v1/upload", uploadData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -85,7 +96,7 @@ export const EditRenovation = () => {
         setFormData({ ...formData, articles: newArticles });
       }
 
-      toast.success("Image mise à jour");
+      toast.success("Image mise à jour avec succès");
     } catch (err) {
       toast.error("Erreur lors de l'upload");
     } finally {
@@ -118,14 +129,14 @@ export const EditRenovation = () => {
         <button
           onClick={() => mutation.mutate(formData)}
           disabled={mutation.isPending}
-          className="w-full md:w-auto bg-primary text-white px-10 py-4 rounded-sm font-bold flex items-center justify-center gap-3 hover:brightness-110 shadow-xl shadow-primary/20 transition-all disabled:opacity-50"
+          className="w-full md:w-auto bg-primary text-white px-10 py-4 rounded-sm font-bold flex items-center justify-center gap-3 hover:brightness-110 shadow-xl disabled:opacity-50 transition-all"
         >
           {mutation.isPending ? (
             <Loader2 className="animate-spin w-5 h-5" />
           ) : (
             <Save size={20} />
           )}
-          ENREGISTRER
+          SAUVEGARDER
         </button>
       </div>
 
@@ -134,7 +145,7 @@ export const EditRenovation = () => {
           {/* SECTION HERO */}
           <section className="bg-white p-8 rounded-sm shadow-sm border border-gray-100">
             <h2 className="font-bold uppercase text-xs text-primary tracking-widest mb-6 flex items-center gap-2">
-              <ImageIcon size={16} /> Bannière Hero
+              <ImageIcon size={16} /> Section Hero
             </h2>
             <div className="space-y-6">
               <input
@@ -153,11 +164,9 @@ export const EditRenovation = () => {
                   className="w-full h-full object-cover"
                 />
                 <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white">
-                  <Upload size={24} className="mb-2" />
-                  <span className="font-bold text-xs uppercase tracking-widest">
-                    {uploadingField === "hero"
-                      ? "Téléchargement..."
-                      : "Remplacer l'image hero"}
+                  <Upload size={24} />
+                  <span className="font-bold text-xs">
+                    {uploadingField === "hero" ? "Envoi..." : "Changer l'image"}
                   </span>
                   <input
                     type="file"
@@ -204,10 +213,7 @@ export const EditRenovation = () => {
                   >
                     <img src={img} className="w-full h-full object-cover" />
                     <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white">
-                      <Upload size={20} className="mb-1" />
-                      <span className="text-[10px] font-bold uppercase">
-                        Changer photo {idx + 1}
-                      </span>
+                      <Upload size={20} />
                       <input
                         type="file"
                         className="hidden"
@@ -223,7 +229,7 @@ export const EditRenovation = () => {
           </section>
         </div>
 
-        {/* SIDEBAR : SERVICES */}
+        {/* SIDEBAR : PRESTATIONS */}
         <div className="space-y-8">
           <section className="bg-white p-8 rounded-sm shadow-sm border border-gray-100">
             <h2 className="font-bold uppercase text-xs text-gray-400 tracking-widest mb-6 flex items-center gap-2">
@@ -254,7 +260,7 @@ export const EditRenovation = () => {
                         intro: { ...formData.intro, services: newS },
                       });
                     }}
-                    className="opacity-0 group-hover:opacity-100 text-red-400"
+                    className="text-red-400 opacity-0 group-hover:opacity-100"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -266,36 +272,24 @@ export const EditRenovation = () => {
                     ...formData,
                     intro: {
                       ...formData.intro,
-                      services: [
-                        ...formData.intro.services,
-                        "Nouveau service de rénovation",
-                      ],
+                      services: [...formData.intro.services, "Nouveau service"],
                     },
                   })
                 }
-                className="w-full mt-4 py-3 border-2 border-dashed border-gray-100 text-[10px] font-black uppercase text-gray-400 hover:border-primary hover:text-primary transition-all"
+                className="w-full mt-4 py-2 border-2 border-dashed border-gray-100 text-[10px] font-black uppercase text-gray-400 hover:border-primary hover:text-primary transition-all"
               >
-                + Ajouter une ligne
+                + Ajouter
               </button>
             </div>
           </section>
         </div>
       </div>
 
-      {/* ARTICLES DE TRANSFORMATION AVEC SLUG */}
+      {/* ARTICLES DE FOCUS AVEC SLUGS */}
       <section className="space-y-8">
-        <div className="flex justify-between items-center border-t pt-10">
-          <h2 className="text-2xl font-black tracking-tighter uppercase text-black">
-            Focus Rénovation (Articles)
-          </h2>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-black text-white px-6 py-2 rounded-sm font-bold text-xs flex items-center gap-2 hover:bg-primary transition-all"
-          >
-            <Plus size={16} /> NOUVEAU FOCUS
-          </button>
-        </div>
-
+        <h2 className="text-2xl font-black tracking-tighter uppercase border-t pt-10">
+          L'Art de la Transformation
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {formData.articles?.map((art: any, i: number) => (
             <div
@@ -304,20 +298,20 @@ export const EditRenovation = () => {
             >
               <button
                 onClick={() => {
-                  if (window.confirm("Supprimer cet article ?")) {
+                  if (window.confirm("Supprimer ?")) {
                     const newArt = formData.articles.filter(
                       (_: any, idx: number) => idx !== i,
                     );
                     setFormData({ ...formData, articles: newArt });
                   }
                 }}
-                className="absolute top-4 right-4 p-2 text-gray-300 hover:text-red-500 transition-colors"
+                className="absolute top-4 right-4 p-2 text-gray-200 hover:text-red-500 transition-colors"
               >
                 <Trash2 size={20} />
               </button>
 
               <div className="flex flex-col sm:flex-row gap-6">
-                <div className="w-full sm:w-40">
+                <div className="w-full sm:w-32">
                   <div className="relative group aspect-square bg-gray-50 rounded-sm overflow-hidden border">
                     <img
                       src={art.image}
@@ -334,14 +328,14 @@ export const EditRenovation = () => {
                   </div>
                 </div>
                 <div className="flex-1 space-y-4">
-                  {/* CHAMP SLUG POUR LIAISON DYNAMIQUE */}
+                  {/* CHAMP SLUG BLEU POUR LIAISON */}
                   <div className="bg-blue-50/50 p-2 rounded-sm border border-blue-100">
-                    <label className="text-[9px] font-black text-blue-500 uppercase tracking-widest block mb-1">
-                      Slug de l'article détaillé
+                    <label className="text-[9px] font-black text-blue-500 uppercase flex items-center gap-1 mb-1">
+                      <LinkIcon size={10} /> Slug de l'article détaillé
                     </label>
                     <input
-                      className="w-full text-xs font-mono bg-transparent outline-none focus:text-blue-700"
-                      placeholder="ex: renovation-design"
+                      className="w-full text-[10px] font-mono bg-transparent outline-none focus:text-blue-700"
+                      placeholder="ex: renovation-thermique"
                       value={art.slug || ""}
                       onChange={(e) => {
                         const newArtList = [...formData.articles];
@@ -350,23 +344,22 @@ export const EditRenovation = () => {
                       }}
                     />
                   </div>
-
                   <input
-                    className="w-full text-[10px] font-black text-primary uppercase tracking-widest bg-transparent border-b border-gray-50 outline-none"
+                    className="w-full text-[10px] font-black text-primary uppercase border-b border-gray-50 outline-none"
                     value={art.badge || ""}
                     onChange={(e) => {
-                      const newArt = [...formData.articles];
-                      newArt[i].badge = e.target.value;
-                      setFormData({ ...formData, articles: newArt });
+                      const n = [...formData.articles];
+                      n[i].badge = e.target.value;
+                      setFormData({ ...formData, articles: n });
                     }}
                   />
                   <input
                     className="w-full font-bold text-lg outline-none"
                     value={art.title || ""}
                     onChange={(e) => {
-                      const newArt = [...formData.articles];
-                      newArt[i].title = e.target.value;
-                      setFormData({ ...formData, articles: newArt });
+                      const n = [...formData.articles];
+                      n[i].title = e.target.value;
+                      setFormData({ ...formData, articles: n });
                     }}
                   />
                   <textarea
@@ -374,9 +367,9 @@ export const EditRenovation = () => {
                     rows={4}
                     value={art.text || ""}
                     onChange={(e) => {
-                      const newArt = [...formData.articles];
-                      newArt[i].text = e.target.value;
-                      setFormData({ ...formData, articles: newArt });
+                      const n = [...formData.articles];
+                      n[i].text = e.target.value;
+                      setFormData({ ...formData, articles: n });
                     }}
                   />
                 </div>
@@ -384,13 +377,19 @@ export const EditRenovation = () => {
             </div>
           ))}
         </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="w-full py-4 border-2 border-dashed border-gray-200 text-gray-400 font-bold uppercase text-xs hover:border-primary hover:text-primary transition-all"
+        >
+          + Ajouter un nouveau focus
+        </button>
       </section>
 
       {/* MODAL NOUVEL ARTICLE */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Nouvelle Expertise Rénovation"
+        title="Nouveau Focus Rénovation"
       >
         <div className="space-y-5">
           <input
@@ -403,7 +402,7 @@ export const EditRenovation = () => {
           />
           <input
             className="w-full p-4 bg-gray-50 border border-gray-100 outline-none focus:border-primary font-mono text-xs"
-            placeholder="Slug de l'article (ex: renovation-thermique)"
+            placeholder="Slug (ex: renovation-energetique)"
             value={newArticle.slug}
             onChange={(e) =>
               setNewArticle({ ...newArticle, slug: e.target.value })
@@ -411,7 +410,7 @@ export const EditRenovation = () => {
           />
           <textarea
             className="w-full p-4 bg-gray-50 border border-gray-100 outline-none focus:border-primary text-sm"
-            placeholder="Description courte..."
+            placeholder="Description..."
             rows={5}
             value={newArticle.text}
             onChange={(e) =>
@@ -426,9 +425,9 @@ export const EditRenovation = () => {
                 articles: [...formData.articles, newArticle],
               });
               setIsModalOpen(false);
-              toast.success("Expertise ajoutée au brouillon");
+              toast.success("Ajouté au brouillon");
             }}
-            className="w-full bg-primary text-white py-5 font-black uppercase tracking-widest hover:brightness-110 shadow-lg"
+            className="w-full bg-primary text-white py-4 font-black uppercase tracking-widest hover:brightness-110 shadow-lg"
           >
             CONFIRMER L'AJOUT
           </button>
