@@ -46,4 +46,23 @@ class LeadController extends Controller
 
         return response()->json(['message' => 'Message envoyé avec succès !'], 200);
     }
+
+    public function index() {
+        // Retourne les leads du tenant actuel, triés du plus récent au plus ancien
+        return response()->json(
+            \App\Models\Lead::orderBy('created_at', 'desc')->get()
+        );
+    }
+
+    public function destroy($id) {
+        $lead = \App\Models\Lead::findOrFail($id);
+        $lead->delete();
+        return response()->json(['message' => 'Message supprimé']);
+    }
+
+    public function markAsRead($id) {
+        $lead = \App\Models\Lead::findOrFail($id);
+        $lead->update(['status' => 'read']);
+        return response()->json($lead);
+    }
 }

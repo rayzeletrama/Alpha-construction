@@ -27,6 +27,7 @@ import { Settings } from "./pages/admin/Settings.tsx";
 import { EditArticle } from "./pages/admin/EditArticle.tsx";
 import { ArticleList } from "./pages/admin/ArticleList.tsx";
 import { Toaster } from "sonner";
+import { Leads } from "./pages/admin/Leads.tsx";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ function App() {
               <Route path="articles" element={<ArticleList />} />
               <Route path="articles/new" element={<EditArticle />} />
               <Route path="articles/edit/:slug" element={<EditArticle />} />
+              <Route path="leads" element={<Leads />} />
               {/* Ajout des routes manquantes qui causaient l'erreur console */}
               <Route
                 path="products"

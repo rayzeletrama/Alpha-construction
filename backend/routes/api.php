@@ -65,6 +65,10 @@ Route::middleware(['tenant'])->group(function () {
             Route::post('/v1/articles', [ArticleController::class, 'store']);    // Créer (Publier)
             Route::put('/v1/articles/{id}', [ArticleController::class, 'update']); // Modifier
             Route::delete('/v1/articles/{id}', [ArticleController::class, 'destroy']); // Supprimer
+
+            Route::get('/v1/leads', [LeadController::class, 'index']);
+            Route::delete('/v1/leads/{id}', [LeadController::class, 'destroy']);
+            Route::patch('/v1/leads/{id}/read', [LeadController::class, 'markAsRead']);
         });
     });
 });

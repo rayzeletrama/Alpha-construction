@@ -13,10 +13,20 @@ import {
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/src/lib/axios";
 
 export const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
+  // 1. Récupérer les infos du dashboard (dont le nombre de messages non lus)
+  const { data: dashboardData } = useQuery({
+    queryKey: ["admin-dashboard"], // Partagé avec la page Dashboard.tsx
+    queryFn: async () => (await api.get("/v1/dashboard")).data,
+    refetchInterval: 30000, // Rafraîchit le badge toutes les 30 secondes
+  });
+
+  const unreadCount = dashboardData?.unread_leads_count || 0;
 
   // Fermer la sidebar sur mobile quand on change de page
   useEffect(() => {
@@ -26,6 +36,12 @@ export const AdminLayout = () => {
   const menuItems = [
     { name: "Dashboard", path: "/admin", icon: <LayoutDashboard size={20} /> },
     { name: "Page Accueil", path: "/admin/home", icon: <Home size={20} /> },
+    {
+      name: "Messages",
+      path: "/admin/leads",
+      icon: <Mail size={20} />,
+      badge: unreadCount,
+    },
     {
       name: "Articles Détails",
       path: "/admin/articles",
@@ -123,6 +139,16 @@ export const AdminLayout = () => {
               <span className="font-bold text-sm tracking-tight">
                 {item.name}
               </span>
+              {/* AFFICHAGE DU BADGE ROUGE */}
+              {item.badge > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="bg-red-500 text-white text-[10px] font-black h-5 min-w-[20px] px-1.5 flex items-center justify-center rounded-full shadow-lg border-2 border-black"
+                >
+                  {item.badge > 99 ? "99+" : item.badge}
+                </motion.span>
+              )}
             </Link>
           ))}
         </nav>

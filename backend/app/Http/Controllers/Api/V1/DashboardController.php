@@ -34,7 +34,15 @@ class DashboardController extends Controller
                     'trend' => 'Vous seul',
                     'icon' => 'Users'
                 ],
+                [
+                'label' => 'Messages non lus',
+                'value' => \App\Models\Lead::where('status', 'new')->count(),
+                'trend' => 'À traiter',
+                'icon' => 'Mail',
+                'unread_count' => \App\Models\Lead::where('status', 'new')->count(), // Doublon pour le badge
+                ],
             ],
+            'unread_leads_count' => \App\Models\Lead::where('status', 'new')->count(),
             'recent_pages' => Page::orderBy('updated_at', 'desc')->take(5)->get(['title', 'slug', 'updated_at']),
             'tenant_info' => app('currentTenant')
         ]);

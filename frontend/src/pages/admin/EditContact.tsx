@@ -18,12 +18,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import imageCompression from "browser-image-compression"; // ✅ Ajout compression
 
 export const EditContact = () => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<any>(null);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
 
+  // 1. Récupérer les données
   const { data: page, isLoading } = useQuery({
     queryKey: ["page", "contact"],
     queryFn: async () => (await api.get("/v1/pages/contact")).data,
@@ -33,16 +35,18 @@ export const EditContact = () => {
     if (page) setFormData(page.content);
   }, [page]);
 
+  // 2. Mutation de sauvegarde
   const mutation = useMutation({
     mutationFn: (newContent: any) =>
       api.put("/v1/pages/contact", { content: newContent }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["page", "contact"] });
-      toast.success("Page Contact mise à jour !");
+      toast.success("Page Contact mise à jour avec succès !");
     },
     onError: () => toast.error("Erreur lors de la sauvegarde."),
   });
 
+  // 3. Gestion de l'upload d'images avec COMPRESSION
   const handleImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "hero" | "value",
@@ -52,19 +56,32 @@ export const EditContact = () => {
     if (!file) return;
 
     setUploadingField(index !== undefined ? `${type}-${index}` : type);
-    const data = new FormData();
-    data.append("file", file);
 
     try {
-      const res = await api.post("/v1/upload", data);
+      // ✅ Compression pour éviter l'erreur 502 de Render
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+      toast.info("Optimisation de l'image...");
+      const compressedFile = await imageCompression(file, options);
+
+      // ✅ Correction du nom pour éviter l'erreur .append
+      const uploadData = new FormData();
+      uploadData.append("file", compressedFile);
+
+      const res = await api.post("/v1/upload", uploadData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const newUrl = res.data.url;
+
       if (type === "hero") {
-        setFormData({
-          ...formData,
-          hero: { ...formData.hero, image: res.data.url },
-        });
+        setFormData({ ...formData, hero: { ...formData.hero, image: newUrl } });
       } else {
         const newArticles = [...formData.values_section.articles];
-        newArticles[index!].image = res.data.url;
+        newArticles[index!].image = newUrl;
         setFormData({
           ...formData,
           values_section: { ...formData.values_section, articles: newArticles },
@@ -72,17 +89,18 @@ export const EditContact = () => {
       }
       toast.success("Image mise à jour");
     } catch (err) {
-      toast.error("Erreur upload");
+      toast.error("Erreur lors de l'upload");
     } finally {
       setUploadingField(null);
     }
   };
 
+  // 4. Helpers
   const addValue = () => {
     const newArticle = {
       badge: `Valeurs 0${formData.values_section.articles.length + 1}`,
       title: "Nouvelle Valeur",
-      slug: "", // Champ pour le lien
+      slug: "",
       text: "Description...",
       image: "https://images.unsplash.com/photo-1497366216548-37526070297c",
     };
@@ -123,11 +141,12 @@ export const EditContact = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-10 pb-20 px-4 md:px-0">
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
         <div>
           <Link
             to="/contact"
-            className="text-[10px] font-black text-gray-400 hover:text-primary flex items-center gap-2 mb-2 uppercase tracking-widest"
+            className="text-[10px] font-black text-gray-400 hover:text-primary flex items-center gap-2 mb-2 transition-all uppercase tracking-widest"
           >
             <ArrowLeft size={12} /> Voir la page publique
           </Link>
@@ -154,12 +173,12 @@ export const EditContact = () => {
           {/* SECTION HERO */}
           <section className="bg-white p-6 md:p-8 rounded-sm shadow-sm border border-gray-100">
             <h2 className="font-bold uppercase text-xs text-primary tracking-widest mb-6 flex items-center gap-2">
-              <ImageIcon size={16} /> Bannière
+              <ImageIcon size={16} /> Bannière Hero
             </h2>
             <div className="space-y-4">
               <input
-                className="w-full p-3 bg-gray-50 border border-gray-100 outline-none focus:border-primary font-bold"
-                value={formData.hero.title || ""}
+                className="w-full p-3 bg-gray-50 border border-gray-100 outline-none focus:border-primary font-bold text-lg"
+                value={formData.hero?.title || ""}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -169,11 +188,14 @@ export const EditContact = () => {
               />
               <div className="relative group aspect-video bg-gray-100 rounded-sm overflow-hidden border">
                 <img
-                  src={formData.hero.image}
+                  src={formData.hero?.image}
                   className="w-full h-full object-cover"
                 />
-                <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer text-white">
+                <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white">
                   <Upload size={24} />
+                  <span className="font-bold text-xs uppercase">
+                    {uploadingField === "hero" ? "Envoi..." : "Changer"}
+                  </span>
                   <input
                     type="file"
                     className="hidden"
@@ -187,17 +209,17 @@ export const EditContact = () => {
           {/* COORDONNÉES */}
           <section className="bg-white p-6 md:p-8 rounded-sm shadow-sm border border-gray-100">
             <h2 className="font-bold uppercase text-xs text-black tracking-widest mb-6 flex items-center gap-2">
-              <MapIcon size={16} /> Coordonnées & Devis
+              <MapIcon size={16} /> Infos & Devis
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <label className="text-[10px] font-black text-gray-400 uppercase">
-                  Adresse
+                  Adresse physique
                 </label>
                 <textarea
                   className="w-full p-3 bg-gray-50 border border-gray-100 outline-none focus:border-primary text-sm"
                   rows={2}
-                  value={formData.info_section.address || ""}
+                  value={formData.info_section?.address || ""}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -209,8 +231,8 @@ export const EditContact = () => {
                   }
                 />
 
-                <label className="text-[10px] font-black text-gray-400 uppercase">
-                  Email de réception (Formulaire)
+                <label className="text-[10px] font-black text-blue-500 uppercase">
+                  Email de réception (Lead)
                 </label>
                 <input
                   className="w-full p-3 bg-blue-50 border border-blue-100 outline-none focus:border-primary font-bold text-primary"
@@ -226,7 +248,7 @@ export const EditContact = () => {
                 </label>
                 <input
                   className="w-full p-3 bg-gray-50 border border-gray-100 outline-none focus:border-primary"
-                  value={formData.info_section.phone || ""}
+                  value={formData.info_section?.phone || ""}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -239,11 +261,11 @@ export const EditContact = () => {
                 />
 
                 <label className="text-[10px] font-black text-gray-400 uppercase">
-                  Lien Google Maps
+                  Lien Iframe Maps
                 </label>
                 <input
                   className="w-full p-3 bg-gray-50 border border-gray-100 outline-none focus:border-primary text-[10px] font-mono"
-                  value={formData.info_section.google_maps_url || ""}
+                  value={formData.info_section?.google_maps_url || ""}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -259,11 +281,11 @@ export const EditContact = () => {
           </section>
         </div>
 
-        {/* VALEURS & LIAISON ARTICLES */}
+        {/* COLONNE DROITE : VALEURS */}
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="font-bold uppercase text-xs text-gray-400 tracking-widest">
-              Valeurs & Liens Articles
+              Articles de Valeurs
             </h2>
             <button
               onClick={addValue}
@@ -274,7 +296,7 @@ export const EditContact = () => {
           </div>
 
           <div className="space-y-6">
-            {formData.values_section.articles.map(
+            {formData.values_section?.articles?.map(
               (article: any, index: number) => (
                 <div
                   key={index}
@@ -302,14 +324,13 @@ export const EditContact = () => {
                     </label>
                   </div>
 
-                  {/* CHAMP SLUG DE LIAISON */}
                   <div className="bg-blue-50/50 p-2 rounded-sm border border-blue-100">
-                    <label className="text-[9px] font-black text-blue-500 uppercase tracking-widest block mb-1 flex items-center gap-1">
-                      <LinkIcon size={10} /> Slug de l'article lié
+                    <label className="text-[9px] font-black text-blue-500 uppercase flex items-center gap-1 mb-1">
+                      <LinkIcon size={10} /> Slug de liaison
                     </label>
                     <input
                       className="w-full text-[10px] font-mono bg-transparent outline-none"
-                      placeholder="ex: contact-qualite"
+                      placeholder="ex: contact-engagement"
                       value={article.slug || ""}
                       onChange={(e) =>
                         updateArticle(index, "slug", e.target.value)
