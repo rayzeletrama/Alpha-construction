@@ -280,7 +280,7 @@ const Footer = ({ name, settings }: any) => (
 
 export const Layout = () => {
   const { pathname } = useLocation();
-  const { data } = useSettings();
+  const { data, isLoading, isError } = useSettings();
   useBranding(data?.settings, data?.name);
 
   useEffect(() => {
@@ -293,13 +293,42 @@ export const Layout = () => {
     }
   }, [pathname, data]);
 
+  if (isLoading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-white">
+        <Icons.Loader2 className="animate-spin text-primary w-10 h-10" />
+      </div>
+    );
+  }
+
+  // 2. Si l'API est en erreur (ex: Render dort), on affiche un message propre
+  if (isError || !data) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-gray-50 p-6 text-center">
+        <Icons.AlertTriangle className="text-red-500 mb-4" size={48} />
+        <h1 className="text-2xl font-black uppercase tracking-tighter">
+          Serveur en cours de réveil
+        </h1>
+        <p className="text-gray-500 mt-2">
+          La connexion avec la base de données prend plus de temps que prévu.
+          Veuillez patienter...
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-6 bg-black text-white px-8 py-3 font-bold uppercase text-xs"
+        >
+          Réessayer
+        </button>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen">
       <Navbar name={data?.name} settings={data?.settings} />
       <main>
         <Outlet />
-        <WhyUs items={data?.settings?.why_us} />
-        <Partners items={data?.settings?.partners} />
+        <WhyUs items={data?.settings?.why_us || []} />
+        <Partners items={data?.settings?.partners || []} />
         <CTA settings={data?.settings} />
       </main>
       <Footer name={data?.name} settings={data?.settings} />
