@@ -56,7 +56,7 @@ export const AdminLayout = () => {
 
   // B. Erreur d'authentification ou expiration de session (Sécurité)
   // Si l'API renvoie 401 ou si une erreur survient, on redirige vers le login
-  if (isError) {
+  if (isError || !dashboardData) {
     localStorage.removeItem("auth_token");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
